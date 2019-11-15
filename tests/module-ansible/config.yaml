@@ -1,0 +1,48 @@
+---
+generic:
+  # If null or "", use the git top-level directory
+  project_namespace: test-module-ansible
+
+ansible:
+  # These roles are added to build/requirements.yaml and are added
+  # locally via 'ansible-galaxy'.
+  roles:
+    - src: https://github.com/pwyoung/ansible-role-sanity-check
+      name: ansible-role-sanity-check
+      scm: git
+      version: 0.0.2
+  # 'playbooks' specifies a list of playbooks to fetch.
+  # Currently, only 'scm: git' is supported.
+  # Each playbook will be cloned into build/playbooks/<entry>
+  # A script, build/run-playbooks.sh will be created so that the playbooks
+  # can be run manually (e.g. during development of a local role)
+  # The order that the playbooks are listed below will be preserved
+  # in build/run-playbooks.sh.
+  playbooks:
+    - src: https://github.com/pwyoung/ansible-playbook-sanity-check
+      name: ansible-playbook-sanity-check
+      scm: git
+      version: master
+      entry: playbook.yaml # Defaults to site.yml
+  # Use this to create build/inventory.yml
+  # Ansible Group names should not contain '-' or '.'
+  inventory:
+    all:
+      vars:
+        ansible_python_interpreter: /usr/bin/python3
+      hosts:
+        localhost:
+      children:
+        group_a:
+          hosts:
+            localhost:
+        group_b:
+          hosts:
+            localhost:
+        group_c:
+          children:
+            group_a:
+            group_b:
+  # Use this to create build/extra_vars.yaml
+  extra_vars:
+    test_msg: TEST MESSAGE FROM EXTRA_VARS

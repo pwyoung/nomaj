@@ -1,0 +1,166 @@
+---
+generic:
+  project_namespace: test-example-k8s-via-kubespray
+
+vagrant:
+  boxes:
+    - name: k-1
+    - name: k-2
+    - name: k-3
+#    - name: k-4
+#    - name: k-5
+  global:
+    memory: 4096
+    cpus: 4
+    boot_timeout: 300
+    nvme_disks:
+      data1:
+        size: 102400
+      data2:
+        size: 102400
+      data3:
+        size: 102400
+      data4:
+        size: 102400
+      data5:
+        size: 102400
+      data6:
+        size: 102400
+      data7:
+        size: 102400
+      data8:
+        size: 102400
+      data9:
+        size: 102400
+      data10:
+        size: 102400
+      data11:
+        size: 102400
+      data12:
+        size: 102400
+      data13:
+        size: 102400
+      data14:
+        size: 102400
+      data15:
+        size: 102400
+      data16:
+        size: 102400
+      data17:
+        size: 102400
+      data18:
+        size: 102400
+      data19:
+        size: 102400
+      data20:
+        size: 102400
+    virtualbox_cfg:
+      enabled: True # If not true then omit from Vagrantfile
+      box: 'generic/ubuntu1804'
+      enable_sse4: true
+      nvme_disk_postfix: 'vdi' # can be vdi, vmdk, vhd
+      nvme_disk_path: '.vagrant/nvme_disks/' # Default to a path relative to the Vagrantfile (common for VirtualBox)
+      nvme_disk_prefix: 'nvme_disk'
+      append_project_name_to_nvme_disk_path: 'true'
+    libvirt_cfg:
+      enabled: True # If not true then omit from Vagrantfile
+      box: 'generic/ubuntu1804'
+      machine_type: 'q35'
+      nvme_disk_postfix: 'qcow2'
+      nvme_disk_id_prefix: 'drv'
+      qemu_group: null # If this is not null, set the group on the storage files to this group
+      emulator_path: '/usr/bin/qemu-system-x86_64'
+      nvme_disk_path: '$HOME/.local/share/libvirt/images/' # Default to something that works for QEMU://session
+      append_project_name_to_nvme_disk_path: 'true'
+
+docker:
+  enabled: False # If not true then omit from processing
+  # build/docker/docker-compose.yml
+  compose:
+    version: '2'
+    services:
+      hello_world:
+        image: ubuntu
+        command: [/bin/echo, 'Hello world']
+  # build/docker/.env
+  #env:
+  #   COMPOSE_PROJECT_NAME=<project_namespace>
+
+ansible:
+  roles:
+    - name: "ansible-role-mount-disks"
+      src: "https://github.com/pwyoung/ansible-role-mount-disks.git"
+      scm: "git"
+      version: "master"
+    - name: "create_partition"
+      src: "https://github.com/mcgrof/create_partition.git"
+      scm: "git"
+      version: "v1.2.1"
+  playbooks:
+    - name: "ansible-playbook-deploy-kubespray"
+      scm: "git"
+      src: "https://github.com/pwyoung/ansible-playbook-deploy-kubespray.git"
+      version: "master"
+      #src: "file:///home/pyoung/git/current/ansible-playbook-deploy-kubespray"
+      #version: "dev"
+  inventory:
+    all:
+      vars:
+        ansible_python_interpreter: "/usr/bin/python3"
+      hosts:
+        k-1:
+        k-2:
+        k-3:
+#        k-4:
+#        k-5:
+      children:
+        kube-master:
+          hosts:
+            k-1:
+            k-2:
+        kube-k:
+          hosts:
+            k-1:
+            k-2:
+            k-3:
+#            k-4:
+#            k-5:
+        etcd:
+          hosts:
+            k-1:
+            k-2:
+            k-3:
+#            k-4:
+#            k-5:
+        k8s-cluster:
+          children:
+            kube-master:
+            kube-k:
+        calico-rr:
+          hosts: {}
+  extra_vars:
+    # Kubespray generic/download parameters:
+    #   Notes:
+    #     This has things like helm_version which is not listed in roles/kubernetes-apps/helm/defaults/main.yml
+    #   URL:
+    #     https://github.com/kubernetes-sigs/kubespray/blob/master/roles/download/defaults/main.yml
+    #
+    # Helm
+    #   https://github.com/kubernetes-sigs/kubespray/blob/master/roles/kubernetes-apps/helm/defaults/main.yml
+    helm_enabled: true
+    #
+    # Local Volumes
+    #   https://github.com/kubernetes-sigs/kubespray/tree/master/roles/kubernetes-apps/external_provisioner/local_volume_provisioner
+    local_volume_provisioner_enabled: true
+    local_volume_provisioner_storage_classes:
+      local-storage:
+        host_dir: /mnt/disks
+        mount_dir: /mnt/disks
+    #
+    # kubespray_ingress_nginx_enabled
+    # dns_cores_per_replica
+    # dns_nodes_per_replica
+    # populate_inventory_to_hosts_file=false
+    # dns_mode
+    # cluster_name
+    # kube_network_plugin

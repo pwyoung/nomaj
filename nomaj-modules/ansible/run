@@ -1,0 +1,65 @@
+#!/usr/bin/env python3
+
+# Notes:
+# - This should work with no arguments.
+# - The config file to use is ../config.yaml.
+# - This should produce its output and perform operations
+#   using the the current working directory
+
+import os
+import sys
+import argparse
+import yaml
+from pathlib import Path
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+from lib.shellcmd import run_command
+
+debug = True
+
+
+class RunAnsible:
+    def __init__(self):
+        self.config_file = os.path.normpath(os.path.join(os.getcwd(),
+                                                         "..",
+                                                         "config.yaml"))
+        self.script_dir = os.path.dirname(os.path.realpath(__file__))  # Path to this script
+
+    def create_ansible_files(self):
+        # Create Ansible files
+        # ${ANSIBLE_DIR}/{extra_vars.yaml,inventory.yaml,playbooks,requirements.yaml,run-playbooks.sh}
+        file_creator = os.path.normpath(os.path.join(self.script_dir,
+                                                     "python",
+                                                     "create-ansible-files.py"))
+        template_dir = os.path.normpath(os.path.join(self.script_dir,
+                                                     "python",
+                                                     "templates"))
+        ansible_dir = os.getcwd()
+        cmd = file_creator
+        cmd += " -c " + self.config_file
+        cmd += " -t " + template_dir
+        cmd += " -a " + ansible_dir
+        run_command(cmd)
+
+    def install_ansible_roles(self):
+        ansible_dir = os.getcwd()
+        # TODO: check if this is empty of roles
+        cmd = "ansible-galaxy install -r " + ansible_dir + "/requirements.yaml -f || true"
+        run_command(cmd)
+
+    def run_generated_playbooks(self):
+        ansible_dir = os.getcwd()
+        cmd = os.path.normpath(os.path.join(ansible_dir,
+                                            "run-playbooks.sh"))
+        run_command(cmd)
+
+
+def main(argv):
+    app = RunAnsible()
+    app.create_ansible_files()
+    app.install_ansible_roles()
+    app.run_generated_playbooks()
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

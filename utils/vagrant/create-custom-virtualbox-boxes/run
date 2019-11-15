@@ -1,0 +1,129 @@
+#!/bin/bash
+
+# GOAL
+#   Create local Vagrant boxes with guest additions installed.
+#   Apply other (expensive) customizations if necessary.
+#   This allows us to not install the guest additions each time we
+#   "vagrant up" a new box.
+#
+# FEATURE
+#   This will rename the new box so that the new box has
+#   the name of the original box.
+#   This allows users to get the box with the guest additions
+#   without updating their vagrantfiles (assuming the guest
+#   additions matches their host)
+
+MY_PATH=$( cd $(dirname "$0") && pwd )
+
+err_handler() {
+    echo "Exiting due to error on line $1"
+    exit 1
+}
+trap 'err_handler $LINENO' ERR
+
+show_help() {
+    echo "-c: Creates the local Vagrant Box (or boxes) with Guest Additions"
+}
+
+# This is used to rename the source and new boxes so that
+# the new box replaces the source box.
+rename_original_box() {
+    SRC_BOX="$1"
+    NEW_BOX="$2"
+
+    # https://www.vagrantup.com/docs/other/environmental-variables.html
+    # VAGRANT_HOME might have been set by the user to change where things live
+    VAGRANT_HOME=${VAGRANT_HOME:-~/.vagrant.d}
+    BOX_DIR=${VAGRANT_HOME}/boxes
+    SRC_BOX=$(echo ${SRC_BOX} | sed 's|/|-VAGRANTSLASH-|g') # This is what Vagrant actually stores on disk
+    NEW_BOX=$(echo ${NEW_BOX} | sed 's|/|-VAGRANTSLASH-|g') # This is what Vagrant actually stores on disk
+    BACKUP_SRC_BOX=${SRC_BOX}-ORIG
+    rm -rf ${BOX_DIR}/${BACKUP_SRC_BOX} 2>/dev/null
+    mv ${BOX_DIR}/${SRC_BOX} ${BOX_DIR}/${BACKUP_SRC_BOX}
+    mv ${BOX_DIR}/${NEW_BOX} ${BOX_DIR}/${SRC_BOX}
+}
+
+# Create a vagrant box with guest additions installed
+# matching the version used on this host
+# Resource: https://scotch.io/tutorials/how-to-create-a-vagrant-base-box-from-an-existing-one
+create_local_box() {
+    SRC_BOX="$1" # Public box
+    NEW_BOX="$2" # Local box
+
+    # This will be relevant if the target box has a custom name
+    if vagrant box list | egrep "^${NEW_BOX} .*" >/dev/null; then
+	echo "Vagrant box ${NEW_BOX} already exists"
+	return
+    fi
+
+    # This will be relevant if the source box has been replaced with a custom version
+    BACKUP_SRC_BOX=${SRC_BOX}-ORIG
+    if vagrant box list | egrep "^${SRC_BOX} .*|^${BACKUP_SRC_BOX} .*" | wc -l | grep 2 >/dev/null; then
+	echo "Vagrant boxes ${SRC_BOX} and ${BACKUP_SRC_BOX} already exist"
+	return
+    fi
+
+    TMP=~/.tmp/make_vagrant_box_${NEW_BOX}
+    mkdir -p ${TMP}
+    cd $TMP
+    if [ -d ./.vagrant ]; then
+	vagrant destroy -f
+	rm ./Vagrantfile
+    fi
+    rm -f $TMP/*
+
+    vagrant init ${SRC_BOX}
+    vagrant plugin install vagrant-vbguest # Install GuestAdditions during 'vagrant up' to match this host
+    vagrant up
+
+    # Emulate target setup here, if needed.
+    # Ideally, don't do this and use the config tool (e.g. Ansible) instead.
+    cat <<EOF | vagrant ssh
+    # Cheat. Do some setup here
+    sudo su - -c 'echo "some-cmd" > ~/setup.log'
+EOF
+
+    # At this point, we have a running vagrant box with the customizations we want.
+    # Now, make a vagrant box out of it.
+
+    vagrant ssh -c "sudo dd if=/dev/zero of=/EMPTY bs=1M ; sudo rm -f /EMPTY"
+    vagrant ssh -c "cat /dev/null > ~/.bash_history && history -c && exit"
+
+    vagrant package --output ${NEW_BOX}.box
+    vagrant box add ${NEW_BOX} ${NEW_BOX}.box
+
+    vagrant box list | grep ${NEW_BOX}
+
+    vagrant destroy -f
+
+    rename_original_box ${SRC_BOX} ${NEW_BOX}
+}
+
+create_local_boxes() {
+    # Uncomment the box(es) actually used
+    create_local_box 'generic/ubuntu1804' 'generic/ubuntu1804'
+    create_local_box 'centos/7' 'centos/7'
+}
+################################################################################
+
+if [ $# -eq 0 ]; then
+    show_help
+    exit 1
+fi
+
+while [ $# -gt 0 ]
+do
+  case $1 in
+      -h) show_help
+          exit 0
+	  ;;
+      -c) create_local_boxes
+	  shift
+	  ;;
+      -*) echo "$0: $1: unrecognized option" >&2
+	  exit 1
+	  ;;
+      **) break
+	  ;;
+  esac
+done

@@ -1,0 +1,14 @@
+a:
+  b:
+    c: a.b.c-changed
+  b2: b2-added
+d: null
+generic:
+  project_namespace: test
+list1:
+- item1a: item-1a-changed
+- item1b: item-1b-changed
+list2:
+- item2a: item-1a
+  item2b: item-2b-changed
+- item2b: item-1b

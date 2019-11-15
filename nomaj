@@ -1,0 +1,174 @@
+#!/usr/bin/env python3
+
+import os
+import sys
+import argparse
+from lib.shellcmd import run_command
+
+debug = True
+
+
+class Nomaj:
+    def __init__(self, cfg):
+        # Arguments
+        self.config_file = cfg.config_file  # Config file
+        self.override_file = cfg.override_file  # Overrides to Config file
+        self.build_dir = cfg.build_dir  # Output of this project
+        self.module_name = cfg.module  # Module to run
+        self.module_script = cfg.module_script  # Module script
+        if debug:
+            print("config_file = " + self.config_file)
+            print("override_file = " + self.override_file)
+            print("build_dir = " + self.build_dir)
+            print("module_name = " + self.module_name)
+            print("module_script = " + self.module_script)
+        # Calculate some parameters
+        self.script_dir = os.path.dirname(os.path.realpath(__file__))
+        self.module_dir = self.set_module_dir()
+        if debug:
+            print("module_dir = " + self.module_dir)
+
+    def create_merged_config_file(self):
+        """ Combine the config file and override file and
+            produce the merged config file in the build dir
+        """
+        merged_config_file = os.path.normpath(os.path.join(self.build_dir,
+                                                           "config.yaml"))
+        cmd = os.path.normpath(os.path.join(self.script_dir,
+                                            "core",
+                                            "config-file",
+                                            "create-merged-config-file.py"))
+        cmd += " -c " + self.config_file
+        cmd += " -o " + self.override_file
+        cmd += " -m " + merged_config_file
+        if debug:
+            print("Creating Config file: " + cmd)
+        rc = run_command(cmd)
+        if rc != 0:
+            print("Command failed")
+            exit(rc)
+
+    def set_module_dir(self):
+        # Specify for the Module Implementation to run
+        # Search path:
+        #   - <Current working dir>/nomaj-modules/<module>
+        #   - ~/.nomaj/nomaj-modules/<module>
+        #   - <Path to this script>/nomaj-modules/<module>
+        global_module = os.path.normpath(os.path.join(os.getenv("HOME"),
+                                                      ".nomaj",
+                                                      "nomaj-modules",
+                                                      self.module_name))
+        local_module = os.path.normpath(os.path.join(os.getcwd(),
+                                                     "nomaj-modules",
+                                                     self.module_name))
+        script_module = os.path.normpath(os.path.join(self.script_dir,
+                                                      "nomaj-modules",
+                                                      self.module_name))
+
+        module_dir = None
+        if os.path.isdir(local_module):
+            module_dir = local_module
+        elif os.path.isdir(global_module):
+            module_dir = global_module
+        elif os.path.isdir(script_module):
+            module_dir = script_module
+
+        if debug:
+            print("Module search path")
+            print("    local_module: " + local_module)
+            print("    global_module: " + global_module)
+            print("    script_module: " + script_module)
+
+        if module_dir is None:
+            print("Could not find module: " + self.module_name)
+            exit(1)
+
+        if not os.path.isdir(module_dir):
+            print("module_dir is not a directory: " + module_dir)
+            exit(1)
+
+        return module_dir
+
+    def execute_module(self):
+        """ Execute the specified module
+        """
+        # The Algorithm is:
+        #   - Create and cd into working directory "<BUILD_DIR>/<module>"
+        #   - Expect there to be a config file "../config.yaml"
+        #   - Execute "<module_dir>/<module_script>"
+
+        # Create the Working Directory for the module
+        working_dir = os.path.normpath(os.path.join(self.build_dir,
+                                                    self.module_name))
+        if not os.path.isdir(working_dir):
+            os.mkdir(working_dir)
+
+        # Traverse this way in case we change the way working_dir is set
+        conf_file = os.path.normpath(os.path.join(working_dir,
+                                                  "..",
+                                                  "config.yaml"))
+        if not os.path.isfile(conf_file):
+            print("Config file is missing: " + conf_file)
+            sys.exit(1)
+
+        command = os.path.normpath(os.path.join(self.module_dir,
+                                                self.module_script))
+        cmd = "cd " + working_dir + " && " + command
+        if debug:
+            print("Executing command: " + cmd)
+        rc = run_command(cmd)
+        if rc != 0:
+            print("Command failed")
+            exit(rc)
+
+
+def read_cli_args(argv):
+    """ Read the CLI args and return sane settings
+    """
+
+    # Hard-coded Default
+    cur_dir = os.getcwd()
+    config_file = os.path.normpath(os.path.join(cur_dir, "config.yaml"))
+    override_file = os.path.normpath(os.path.join(cur_dir, "overrides.yaml"))
+    build_dir = os.path.normpath(os.path.join(cur_dir, "build"))
+    module = 'make'
+    module_script = 'run'
+
+    # Parse the args
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-c', '--config-file',
+                        action='store', type=str, dest="config_file",
+                        help='Path to Config file. Default:'
+                             + config_file,
+                        default=config_file)
+    parser.add_argument('-o', '--override-file',
+                        action='store', type=str, dest="override_file",
+                        help='Path to the Override file. Default:'
+                             + override_file,
+                        default=override_file)
+    parser.add_argument('-b', '--build-dir',
+                        action='store', type=str, dest="build_dir",
+                        help='Path to the output diretory for this project. Default:'
+                             + build_dir,
+                        default=build_dir)
+    parser.add_argument('-m', '--module',
+                        action='store', type=str, dest="module",
+                        help='Module to execute. Default:' + module,
+                        default=module)
+    parser.add_argument('-x', '--module-execution-command',
+                        action='store', type=str, dest="module_script",
+                        help='Module command. Default:' + module_script,
+                        default=module_script)
+    args = parser.parse_args()
+    return args
+
+
+def main(argv):
+    app_cfg = read_cli_args(argv)
+    app = Nomaj(app_cfg)
+    app.create_merged_config_file()
+    app.execute_module()
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

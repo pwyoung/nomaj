@@ -1,0 +1,20 @@
+---
+generic:
+  project_namespace: test # If null, get this from git
+
+a:
+  b: 
+    c: "a.b.c"
+
+d:
+  d2:
+    d3: "d.d2.d3"
+
+list1:
+  - item1a: 'item-1a'
+  - item1b: 'item-1b'  
+
+list2:
+  - item2a: 'item-1a'
+  - item2b: 'item-1b'  
+

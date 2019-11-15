@@ -1,0 +1,21 @@
+---
+
+a:
+  b: 
+    c: "a.b.c-changed"
+  b2: "b2-added"
+
+d: null # Removed
+
+# List overrides are positional
+# You can't change an item in a list without
+# specifying/overriding the items before it
+#
+# So, this will change both list items to the overrides specified
+list1:
+  - item1a: 'item-1a-changed'    
+  - item1b: 'item-1b-changed'    
+# But, this will add the "changed" item
+list2:
+  - item2b: 'item-2b-changed'
+

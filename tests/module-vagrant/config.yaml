@@ -1,0 +1,64 @@
+---
+
+generic:
+  project_namespace: test-module-vagrant
+
+vagrant:
+  enabled: True # If not true then omit from processing
+  boxes:
+    - name: node-1
+    - name: node-2
+  global:
+    memory: 4096
+    cpus: 4
+    boot_timeout: 300
+    # Virtualbox only supports one NVME disk controller.
+    # Implications:
+    #   - Load will stress one disk controller which is not accurate
+    #     (or desirable) compared to a system with two controllers.
+    #   - NVME devices are named differently:
+    #       Virtualbox: /dev/nvme0n1, /dev/nvme0n2, etc.
+    #       libvirt:    /dev/nvme0n1, /dev/nvme1n1, etc.
+    nvme_disks:
+      data:
+        size: 102401
+      data2:
+        size: 102401
+    virtualbox_cfg:
+      enabled: True # If not true then omit from Vagrantfile
+      box: generic/ubuntu1804
+      enable_sse4: true
+      nvme_disk_postfix: 'vdi' # can be vdi, vmdk, vhd
+      nvme_disk_path: '.vagrant/nvme_disks/' # Default to a path relative to the Vagrantfile (common for VirtualBox)
+      #nvme_disk_path: '/some-absolute-path/' # May be useful
+      #nvme_disk_path: '$HOME/.local/share/libvirt/images/' # Some other path in the user's home directory
+      nvme_disk_prefix: 'nvme_disk'
+      # If true, then append to 'nvme_disk_path' the name of the project.
+      append_project_name_to_nvme_disk_path: 'true'
+    libvirt_cfg:
+      enabled: True # If not true then omit from Vagrantfile
+      # Vagrant-Libvirt seems to require a manual step: vagrant box add <BOX> --provider=libvirt
+      box: generic/ubuntu1804
+      machine_type: 'q35'
+      nvme_disk_postfix: 'qcow2'
+      nvme_disk_id_prefix: 'drv'
+      qemu_group: null # If this is not null, set the group on the storage files to this group
+      emulator_path: '/usr/bin/qemu-system-x86_64'
+      nvme_disk_path: '$HOME/.local/share/libvirt/images/' # Default to something that works for QEMU://session
+      #nvme_disk_path: '/var/lib/libvirt/images/' # Absolute path (for QEMU://sytem)
+      #nvme_disk_path: '.vagrant/nvme_disks/' # Relative to the Vagrantfile (requires setting perms)
+      # If true, then append to 'nvme_disk_path' the name of the project.
+      append_project_name_to_nvme_disk_path: 'true'
+      # TO ADD: to Libvirt
+      #cdrom:
+      #  path: "/data/downloads/win10/Win10_1903_V2_English_x64.iso"
+      #usb_passthrough:
+      #  bus: 3
+      #  device: 10
+      #boot:
+      #  - "cdrom"
+      #  - "hd"
+      #kvm_hidden: True
+      #video_type: "cirrus"
+      #video_vram: 9216
+      #cpu_mode: "host-model"

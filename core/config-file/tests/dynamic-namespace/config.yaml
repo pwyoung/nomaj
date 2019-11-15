@@ -1,0 +1,4 @@
+---
+#generic:
+#  project_namespace: null # If null, get this from git
+

@@ -1,0 +1,56 @@
+#!/usr/bin/env python3
+
+# Notes:
+# - This should work with no arguments.
+# - The config file to use is ../config.yaml.
+# - This should produce its output and perform operations
+#   using the the current working directory
+
+import os
+import sys
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+from lib.shellcmd import run_command
+
+debug = True
+
+
+class RunMakefile:
+    def __init__(self):
+        self.config_file = os.path.normpath(os.path.join(os.getcwd(),
+                                                         "..",
+                                                         "config.yaml"))
+        self.script_dir = os.path.dirname(os.path.realpath(__file__))  # Path to this script
+
+    def create_makefile(self):
+        makefile_file_creator = os.path.normpath(os.path.join(self.script_dir,
+                                                              "python",
+                                                              "create-makefile.py"))
+        makefile_template_dir = os.path.normpath(os.path.join(self.script_dir,
+                                                              "python",
+                                                              "templates"))
+        makefile_file = os.path.normpath(os.path.join(os.getcwd(),
+                                                      "Makefile"))
+
+        # Create the Makefilefile
+        cmd = makefile_file_creator
+        cmd += " -c " + self.config_file
+        cmd += " -t " + makefile_template_dir
+        cmd += " -m " + makefile_file
+        run_command(cmd)
+
+    def makefile_run(self):
+        """ Run make
+        """
+        cmd = "make"
+        run_command(cmd)
+
+
+def main(argv):
+    app = RunMakefile()
+    app.create_makefile()
+    app.makefile_run()
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
