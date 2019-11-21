@@ -73,19 +73,6 @@ vagrant:
       nvme_disk_path: '$HOME/.local/share/libvirt/images/' # Default to something that works for QEMU://session
       append_project_name_to_nvme_disk_path: 'true'
 
-docker:
-  enabled: False # If not true then omit from processing
-  # build/docker/docker-compose.yml
-  compose:
-    version: '2'
-    services:
-      hello_world:
-        image: ubuntu
-        command: [/bin/echo, 'Hello world']
-  # build/docker/.env
-  #env:
-  #   COMPOSE_PROJECT_NAME=<project_namespace>
-
 ansible:
   roles:
     - name: "ansible-role-mount-disks"

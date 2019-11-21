@@ -9,9 +9,16 @@ import argparse
 import io
 from jinja2 import Environment, FileSystemLoader
 import yaml
-from git.repo.base import Repo
+#from git.repo.base import Repo
+import git
 from pathlib import Path
 import stat
+import shutil
+
+debug = True
+
+# TODO: decide if we should be paranoid or not
+clean_playbooks = False
 
 
 class AnsibleFileCreator:
@@ -79,16 +86,37 @@ class AnsibleFileCreator:
             name = item['name']
             version = item['version']
             dest = os.path.normpath(os.path.join(self.playbook_dir, name))
-            if not os.path.exists(dest):
-                print("Cloning " + src + " to " + dest)
-                Repo.clone_from(src, dest)
-            repo = Repo(dest)
+
+            # Delete the playbook dir if it exists
+            if clean_playbooks and os.path.exists(dest):
+                try:
+                    shutil.rmtree(dest)
+                except OSError as e:
+                    print(e)
+                    exit(1)
+
             if len(version) == 0:
                 version = 'master'
-            repo.git.fetch  # Get all commits (don't "pull" in case there are conflicting local edits)
-            repo.git.checkout(version)  # Switch to our branch
-            repo.git.reset('--hard')  # Remove any local edits
-            repo.git.pull()  # Pull in the latest commits for this branch (merge is insufficient here)
+            if debug:
+                print("src: " + src)
+                print("dest: " + dest)
+                print("name: " + name)
+                print("version: " + version)
+
+            try:
+                if not os.path.exists(dest):
+                    git.Repo.clone_from(src, dest)
+                repo = git.Repo(dest)
+                repo.git.fetch()  # Get all commits (don't "pull" in case there are conflicting local edits)
+                repo.git.checkout(version)  # Switch to our branch
+                repo.git.reset('--hard')  # Remove any local edits
+                repo.git.pull()  # Pull in the latest commits for this branch (merge is insufficient here)
+            except git.GitCommandError as e:
+                print("ERROR: Git-Command-Error: " + str(e))
+                exit(1)
+            except Exception as e:
+                print("ERROR: unexpected error during git operations: " + str(e))
+                exit(1)
 
     def createRunPlaybooksScript(self):
         """ Create a script to runt the playbooks

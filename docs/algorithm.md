@@ -3,7 +3,7 @@
 'nomaj'
   Manages the run.
   It is based on a few key parameters and some conventions.
- ``` 
+ ```
   INPUTS:
     - CONFIG_FILE:
         user-specified input file
@@ -39,6 +39,9 @@ Just call "nomaj -m MODULE" from your project and it will:
   - Create the module dir, BUILD_DIR/<module>
   - Set the working dir to the module dir
   - Run the script for the module
-    - The default script can be overridden
+
+- Defaults:
+  - The default module name is 'make'
+  - The default script is 'run'
 ```
 See the tests for example usage.

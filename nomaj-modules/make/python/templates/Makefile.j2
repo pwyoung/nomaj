@@ -30,16 +30,16 @@ NOMAJ+=--build-dir $(EXISTING_BUILD_DIR)
 
 all:
 	$(info MAKE ALL)
-{%- if vagrant %}
+{% if vagrant %}
 	$(NOMAJ) -m vagrant -x run
 {% endif %}
-{%- if ansible %}
+{% if ansible %}
 	$(NOMAJ) -m ansible -x run
 {% endif %}
 
 clean:
 	$(info MAKE CLEAN)
-{%- if vagrant %}
+{% if vagrant %}
 	$(NOMAJ) -m vagrant -x clean
 {% endif %}
 
