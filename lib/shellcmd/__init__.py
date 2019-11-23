@@ -25,9 +25,8 @@ def run_command(cmd):
         Print output in realtime and retut
     """
     for path in run_shell_cmd_with_output(cmd):
-        print(path, end="")
+        print(path, end="", flush=True)
     return 0
-
 
 if __name__ == "__main__":
     import sys
