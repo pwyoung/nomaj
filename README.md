@@ -24,3 +24,7 @@ The goal of this project is to allow a user to manage an entire project with:
 	- Install Kubespray (the Kubernetes installer) on the first master node
 	- Run ansible, using the variables in the configuration file to control the run
 
+# TODO
+- Additional built-in modules:
+  - Terraform
+  - DockerCompose
