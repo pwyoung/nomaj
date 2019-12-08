@@ -7,7 +7,6 @@ vagrant:
   enabled: True # If not true then omit from processing
   boxes:
     - name: node-1
-    - name: node-2
   global:
     memory: 4096
     cpus: 4
