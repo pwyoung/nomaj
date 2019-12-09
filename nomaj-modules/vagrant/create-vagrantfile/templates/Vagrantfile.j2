@@ -59,6 +59,13 @@ Vagrant.configure("2") do |config|
     ENV['VAGRANT_DEFAULT_PROVIDER']="#{provider}"
 
     {% if vagrant.global.nvme_disks | length > 0 %}
+    # BASIC DISKS
+        {% if vagrant.global.libvirt_cfg.enabled == True %}
+        # <TODO:STOPPED HERE> ADDLIBVIRT DISKS....
+        {% endif %}
+    {% endif %}
+
+    {% if vagrant.global.nvme_disks | length > 0 %}
     # NVME Disk parameters
         {% if vagrant.global.libvirt_cfg.enabled == True %}
             {% if vagrant.global.libvirt_cfg.nvme_disk_path[0:1] == '~' %}

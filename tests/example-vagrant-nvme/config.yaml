@@ -11,29 +11,29 @@ vagrant:
     memory: 4096
     cpus: 4
     boot_timeout: 300
-    basic_disks:
+    # Virtualbox only supports one NVME disk controller.
+    # Implications:
+    #   - Load will stress one disk controller which is not accurate
+    #     (or desirable) compared to a system with two controllers.
+    #   - NVME devices are named differently:
+    #       Virtualbox: /dev/nvme0n1, /dev/nvme0n2, etc.
+    #       libvirt:    /dev/nvme0n1, /dev/nvme1n1, etc.
+    nvme_disks:
       data:
-        size: 102401000
+        size: 102401
       data2:
-        size: 102401000
-    # This has only been successfully tested on Fedora (Fails on Ubuntu)
-    #nvme_disks:
-    #  data:
-    #    size: 102401
+        size: 102401
     virtualbox_cfg:
       enabled: True # If not true then omit from Vagrantfile
       box: generic/ubuntu1804
       enable_sse4: true
-      #
-      # NVME DISK PARAMETERS
-      #
-      #nvme_disk_postfix: 'vdi' # can be vdi, vmdk, vhd
-      #nvme_disk_path: '.vagrant/nvme_disks/' # Default to a path relative to the Vagrantfile (common for VirtualBox)
+      nvme_disk_postfix: 'vdi' # can be vdi, vmdk, vhd
+      nvme_disk_path: '.vagrant/nvme_disks/' # Default to a path relative to the Vagrantfile (common for VirtualBox)
       #nvme_disk_path: '/some-absolute-path/' # May be useful
       #nvme_disk_path: '$HOME/.local/share/libvirt/images/' # Some other path in the user's home directory
-      #nvme_disk_prefix: 'nvme_disk'
+      nvme_disk_prefix: 'nvme_disk'
       # If true, then append to 'nvme_disk_path' the name of the project.
-      #append_project_name_to_nvme_disk_path: 'true'
+      append_project_name_to_nvme_disk_path: 'true'
     libvirt_cfg:
       enabled: True # If not true then omit from Vagrantfile
       # Vagrant-Libvirt seems to require a manual step: vagrant box add <BOX> --provider=libvirt
