@@ -1,0 +1,44 @@
+---
+# NOTE
+#   If you place a file overrides.yaml in the directory with config.yaml
+#   then the files will be merged to produce ./build/config.yaml which
+#   is used subsequently.
+#   This file shows some examples of things you might want to override.
+
+#vagrant:
+#  global:
+#    # This can be used on Linux to force Vagrant to use Virtualbox
+#    force_provider: "virtualbox"
+#
+#    # Omit any boxes beyond 'limit_num_boxes' from the Vagrantfile
+#    limit_boxes: "yes"
+#    limit_num_boxes: 2
+#
+#    # If not "true" then omit from Vagrantfile
+#    virtualbox_cfg:
+#      enabled: "false"
+#    libvirt_cfg:
+#      enabled: "true"
+#      #  In case you use a development version of qemu
+#      # emulator_path: '/usr/local/bin/qemu-system-x86_64'
+#
+# # There is some support for static IPs.
+# #  - On VirtualBox:
+# #    - 'ip', if given,  will be the ip of a Nic on an internal network
+# #    - 'ip2', if given, will be the ip of (an additional) Nic on an internal network
+# #    - 'netmask', if given, will be applied to the above networks.
+# #  - On Libvirt, the values of 'ip', 'ip2', and 'netmask' (currently) don't currently matter.
+# #    - 'ip2', if given, cause a second NIC to be created (on 'libvir1')
+# #    - In future, we could automate management of QEMU networks (as we do with QEMU disks)
+# # Example
+#  boxes:
+#    - name: node-3
+#      ip: 192.254.3.10
+#      netmask: 255.255.255.128
+#      ip2: 192.254.3.138
+
+vagrant:
+  global:
+    libvirt_cfg:
+      # ls -ld /var/lib/libvirt/images # group is libvirt-qemu
+      qemu_group: kvm #libvirt-qemu
