@@ -3,7 +3,7 @@ generic:
   project_namespace: test # If null, get this from git
 
 a:
-  b: 
+  b:
     c: "a.b.c"
 
 d:
@@ -12,9 +12,8 @@ d:
 
 list1:
   - item1a: 'item-1a'
-  - item1b: 'item-1b'  
+  - item1b: 'item-1b'
 
 list2:
   - item2a: 'item-1a'
-  - item2b: 'item-1b'  
-
+  - item2b: 'item-1b'

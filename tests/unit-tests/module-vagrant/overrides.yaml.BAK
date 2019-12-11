@@ -1,5 +1,5 @@
 ---
-# NOTE                                                                                                
+# NOTE
 #   If you place a file overrides.yaml in the directory with config.yaml
 #   then the files will be merged to produce ./build/config.yaml which
 #   is used subsequently.
@@ -40,5 +40,4 @@
 vagrant:
   global:
     libvirt_cfg:
-      qemu_group: null # Use the current user's	group
-
+      enabled: True

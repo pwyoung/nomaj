@@ -49,7 +49,6 @@ vagrant:
       nvme_disk_id_prefix: drv
       nvme_disk_path: $HOME/.local/share/libvirt/images/
       nvme_disk_postfix: qcow2
-      qemu_group: null
     memory: 4096
     nvme_disks:
       data:

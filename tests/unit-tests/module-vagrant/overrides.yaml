@@ -40,4 +40,4 @@
 vagrant:
   global:
     libvirt_cfg:
-      qemu_group: null # Use the current user's group
+      enabled: True

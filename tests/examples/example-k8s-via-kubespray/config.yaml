@@ -68,7 +68,6 @@ vagrant:
       machine_type: 'q35'
       nvme_disk_postfix: 'qcow2'
       nvme_disk_id_prefix: 'drv'
-      qemu_group: null # If this is not null, set the group on the storage files to this group
       emulator_path: '/usr/bin/qemu-system-x86_64'
       nvme_disk_path: '$HOME/.local/share/libvirt/images/' # Default to something that works for QEMU://session
       append_project_name_to_nvme_disk_path: 'true'
