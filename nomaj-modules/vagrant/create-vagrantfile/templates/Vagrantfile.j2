@@ -169,21 +169,7 @@ Vagrant.configure("2") do |config|
             override.vm.hostname = "{{ box.name }}" # Set hostname in the OS
             override.vm.boot_timeout = {{ vagrant.global.boot_timeout }}
             libvirt.watchdog :model => 'i6300esb', :action => 'reset'
-
-            # This is for qemu/session
-            #libvirt.storage_pool_path = File.dirname(__FILE__)
-            #
-            # Use QEMU session instead of system connection
             libvirt.qemu_use_session = true
-            # URI of QEMU session connection, default is as below
-            #libvirt.uri = 'qemu:///session'
-            # URI of QEMU system connection, use to obtain IP address for management, default is below
-            #libvirt.system_uri = 'qemu:///system'
-            # Path to store Libvirt images for the virtual machine, default is as ~/.local/share/libvirt/images
-            #libvirt.storage_pool_path = '/home/pyoung/.local/share/libvirt/images'
-            # Management network device, default is below
-            #libvirt.management_network_device = 'virbr0'
-
             libvirt.memory = {{ vagrant.global.memory }}
             libvirt.cpus = {{ vagrant.global.cpus }}
        	    libvirt.emulator_path = "{{ vagrant.global.libvirt_cfg.emulator_path }}"
@@ -204,7 +190,6 @@ Vagrant.configure("2") do |config|
                 :type => "bridge"
 	    {% endif %}
 
-
             # START: LIBVIRT NVME DRIVES
             {% if vagrant.global.nvme_disks | length -%}
                 {% set port_count = vagrant.global.nvme_disks | length %}
@@ -219,7 +204,7 @@ Vagrant.configure("2") do |config|
                     {% set nvme_disk_postfix = vagrant.global.libvirt_cfg.nvme_disk_postfix %}
             nvme_disk_{{ box_number }}_{{ port }} = libvirt_nvme_path + "{{ box.name }}_{{ port }}.{{ nvme_disk_postfix }}"
 
-            config.trigger.before :up do |trigger|
+            override.trigger.before :up do |trigger|
                 unless File.exist? ( nvme_disk_{{ box_number }}_{{ port }} )
                     if provider == "libvirt"
                         cmd = "qemu-img create -f qcow2 #{ nvme_disk_{{ box_number }}_{{ port }} } {{ size }}M"
@@ -232,15 +217,16 @@ Vagrant.configure("2") do |config|
                 end
             end
 
-            # Make disk file accessible as a device
-            libvirt.qemuargs :value => "-drive"
-            libvirt.qemuargs :value => "file=#{ nvme_disk_{{ box_number }}_{{ port }} },if=none,id={{ disk_id }}"
-            libvirt.qemuargs :value => "-device"
-            libvirt.qemuargs :value => "nvme,drive={{ disk_id }},serial={{ serial_id }}"
+            override.trigger.before :up do |trigger|
+                # Make disk file accessible as a device
+                libvirt.qemuargs :value => "-drive"
+                libvirt.qemuargs :value => "file=#{ nvme_disk_{{ box_number }}_{{ port }} },if=none,id={{ disk_id }}"
+                libvirt.qemuargs :value => "-device"
+                libvirt.qemuargs :value => "nvme,drive={{ disk_id }},serial={{ serial_id }}"
+            end
 
-            {# Vagrant Triggers were added in v2.1.0 #}
             # After destroying the box, remove the file we created
-            config.trigger.after :destroy do |trigger|
+            override.trigger.after :destroy do |trigger|
                 trigger.info = "Destroying file #{ nvme_disk_{{ box_number }}_{{ port }} }"
                 trigger.run = {inline: "rm -f #{ nvme_disk_{{ box_number }}_{{ port }} }"}
                 trigger.on_error = :halt
