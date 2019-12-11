@@ -228,37 +228,15 @@ Vagrant.configure("2") do |config|
                             puts "Command failed: #{cmd}"
                             exit
                         end
-
-                        {% if vagrant.global and
-                              vagrant.global.libvirt_cfg and
-                              vagrant.global.libvirt_cfg.qemu_group and
-                              vagrant.global.libvirt_cfg.qemu_group|length %}
-                        # If vagrant.global.libvirt_cfg.qemu_group is defined, set the NVME files to that group.
-                        qemu_group = "{{ vagrant.global.libvirt_cfg.qemu_group }}"
-                        cmd = "sudo chgrp -R #{ qemu_group } #{ nvme_disk_{{ box_number }}_{{ port }} }"
-                        ok = system("#{cmd}")
-                        if ! ok
-                            puts "Command failed: #{cmd}"
-                            exit
-                        end
-                        cmd = "sudo chmod -R g+rw #{ nvme_disk_{{ box_number }}_{{ port }} }"
-                        ok = system("#{cmd}")
-                        if ! ok
-                            puts "command failed: #{cmd}"
-                            exit
-                         end
-                        {% endif %}
                     end
                 end
             end
-
 
             # Make disk file accessible as a device
             libvirt.qemuargs :value => "-drive"
             libvirt.qemuargs :value => "file=#{ nvme_disk_{{ box_number }}_{{ port }} },if=none,id={{ disk_id }}"
             libvirt.qemuargs :value => "-device"
             libvirt.qemuargs :value => "nvme,drive={{ disk_id }},serial={{ serial_id }}"
-
 
             {# Vagrant Triggers were added in v2.1.0 #}
             # After destroying the box, remove the file we created
