@@ -40,6 +40,8 @@ This has been tested on:
   - vagrant (2.2.3)
   - vagrant-libvirt (0.0.45-2) [ on Linux ]
 - Ansible Module (2.8.3)
+- Libvirt (on Linux)
+  - QEMU/Session
 - Testing
   - Some tests require passwordless-ssh to localhost
     e.g. 'ssh localhost whoami' should work
@@ -47,8 +49,29 @@ This has been tested on:
 # SETUP EXAMPLES
 - PopOS-19.10:
   - Requirements were satisfied with:
-    - sudo apt-get install python3-venv vagrant-libvirt ansible
-    - cd ./<nomaj_dir> && make deps
+    - Python, Ansible, Vagrant, and Libvirt
+      - sudo apt-get install python3-venv vagrant-libvirt ansible
+    - QEMU/Session (for Libvirt/KVM as non-root)
+      - sudo mkdir -p /etc/qemu
+      - echo 'allow virbr0' | sudo tee /etc/qemu/bridge.conf
+      - sudo chmod u+s /usr/lib/qemu/qemu-bridge-helper
+      - Address a Known Bug...
+        - Bug:
+          - https://bugs.launchpad.net/ubuntu/+source/libvirt/+bug/1754871
+            - Clearly, Ubuntu folks are not addressing Libvirt/KVM/QEMU as it is part of RHEL,
+              but podman, CGroups-v2, and so on are part of the future of Linux, IMO.
+          - Symptom/Error when running vagrant-libvirt with qemu/session:
+            - "internal error: /usr/lib/qemu/qemu-bridge-helper"
+            - "failed to write fd to unix socket: Socket operation on non-socket"
+        - Workaround:
+          - Option A: disable AppArmor for libvirtd
+            - https://askubuntu.com/questions/741035/disabling-apparmor-for-kvm
+              - sudo ln -s /etc/apparmor.d/usr.sbin.libvirtd /etc/apparmor.d/disable/usr.sbin.libvirtd
+              - reboot
+          - Option B: (not done)
+            - https://www.redhat.com/archives/libvir-list/2018-April/msg00534.html
+    - Nomaj Python Modules and tests
+      - cd ./<nomaj_dir> && make
   - Convenience/Optional:
     - virt-manager was installed
     - Python 'venv' was configured
