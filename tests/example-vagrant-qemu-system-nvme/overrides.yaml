@@ -40,5 +40,4 @@
 vagrant:
   global:
     libvirt_cfg:
-      # ls -ld /var/lib/libvirt/images # group is libvirt-qemu
-      qemu_group: kvm #libvirt-qemu
+      qemu_group: 'libvirt-qemu'

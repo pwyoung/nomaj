@@ -1,7 +1,10 @@
 Vagrant.require_version ">= 2.0.2"
 
+# sudo chmod 775 /var/lib/libvirt/images
+# sudo chgrp libvirt-qemu /var/lib/libvirt/images # qemu_group
+
+
 require 'rbconfig'
-require 'fileutils'
 
 {% for plugin in vagrant.global.vagrant_plugins %}
 # Install plugins for the user
@@ -56,13 +59,6 @@ Vagrant.configure("2") do |config|
     # Explicitly set the provider variable (that Vagrant uses)
     # This ensures CLI commands like 'vagrant status' use the correct provider
     ENV['VAGRANT_DEFAULT_PROVIDER']="#{provider}"
-
-    {% if vagrant.global.nvme_disks | length > 0 %}
-    # BASIC DISKS
-        {% if vagrant.global.libvirt_cfg.enabled == True %}
-        # <TODO:STOPPED HERE> ADDLIBVIRT DISKS....
-        {% endif %}
-    {% endif %}
 
     {% if vagrant.global.nvme_disks | length > 0 %}
     # NVME Disk parameters
@@ -177,7 +173,21 @@ Vagrant.configure("2") do |config|
             override.vm.hostname = "{{ box.name }}" # Set hostname in the OS
             override.vm.boot_timeout = {{ vagrant.global.boot_timeout }}
             libvirt.watchdog :model => 'i6300esb', :action => 'reset'
-            libvirt.storage_pool_path = File.dirname(__FILE__)
+
+            # This is for qemu/session
+            #libvirt.storage_pool_path = File.dirname(__FILE__)
+            #
+            # Use QEMU session instead of system connection
+            libvirt.qemu_use_session = true
+            # URI of QEMU session connection, default is as below
+            #libvirt.uri = 'qemu:///session'
+            # URI of QEMU system connection, use to obtain IP address for management, default is below
+            #libvirt.system_uri = 'qemu:///system'
+            # Path to store Libvirt images for the virtual machine, default is as ~/.local/share/libvirt/images
+            #libvirt.storage_pool_path = '/home/pyoung/.local/share/libvirt/images'
+            # Management network device, default is below
+            #libvirt.management_network_device = 'virbr0'
+
             libvirt.memory = {{ vagrant.global.memory }}
             libvirt.cpus = {{ vagrant.global.cpus }}
        	    libvirt.emulator_path = "{{ vagrant.global.libvirt_cfg.emulator_path }}"
@@ -220,31 +230,29 @@ Vagrant.configure("2") do |config|
                         puts "Command failed: #{cmd}"
                         exit
                     end
-                end
-            end
 
-            {% if vagrant.global and
-                  vagrant.global.libvirt_cfg and
-                  vagrant.global.libvirt_cfg.qemu_group and
-                  vagrant.global.libvirt_cfg.qemu_group|length %}
-            # If vagrant.global.libvirt_cfg.qemu_group is defined, set the NVME files to that group.
-            if provider == "libvirt"
-                # Ensure the NVME disk file is readable by the Qemu group
-                qemu_group = "{{ vagrant.global.libvirt_cfg.qemu_group }}"
-                cmd = "sudo chgrp -R #{qemu_group} #{libvirt_nvme_path}"
-                ok = system("#{cmd}")
-                if ! ok
-                    puts "Command failed: #{cmd}"
-                    exit
+                    {% if vagrant.global and
+                          vagrant.global.libvirt_cfg and
+                          vagrant.global.libvirt_cfg.qemu_group and
+                          vagrant.global.libvirt_cfg.qemu_group|length %}
+                    # If vagrant.global.libvirt_cfg.qemu_group is defined, set the NVME files to that group.
+                    qemu_group = "{{ vagrant.global.libvirt_cfg.qemu_group }}"
+                    cmd = "sudo chgrp -R #{ qemu_group } #{ nvme_disk_{{ box_number }}_{{ port }} }"
+                    ok = system("#{cmd}")
+                    if ! ok
+                        puts "Command failed: #{cmd}"
+                        exit
+                    end
+                    cmd = "sudo chmod -R g+rw #{ nvme_disk_{{ box_number }}_{{ port }} }"
+                    ok = system("#{cmd}")
+                    if ! ok
+                        puts "command failed: #{cmd}"
+                        exit
+                     end
+                    {% endif %}
+
                 end
-                cmd = "sudo chmod -R g+rw #{libvirt_nvme_path}"
-                ok = system("#{cmd}")
-                if ! ok
-                    puts "command failed: #{cmd}"
-                    exit
-                 end
             end
-            {% endif %}
 
             # Make disk file accessible as a device
             libvirt.qemuargs :value => "-drive"
@@ -252,12 +260,16 @@ Vagrant.configure("2") do |config|
             libvirt.qemuargs :value => "-device"
             libvirt.qemuargs :value => "nvme,drive={{ disk_id }},serial={{ serial_id }}"
 
+            {# Vagrant Triggers were added in v2.1.0 #}
+            {% if vagrant.has_triggers %}
             # After destroying the box, remove the file we created
             override.trigger.after :destroy do |trigger|
                 trigger.info = "Destroying file #{ nvme_disk_{{ box_number }}_{{ port }} }"
                 trigger.run = {inline: "rm -f #{ nvme_disk_{{ box_number }}_{{ port }} }"}
                 trigger.on_error = :halt
             end
+            {% endif %}
+
 	        {% endfor %} {# for key, val in vagrant.global.nvme_disks.items() #}
 	    {% endif %}	{# if vagrant.global.nvme_disks | length #}
             # END: LIBVIRT NVME DRIVES
