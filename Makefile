@@ -1,17 +1,14 @@
 .PHONY=deps test
 
-ALL_TESTS=$(wildcard ./tests/*)
-TESTS=$(subst "./tests/example-k8s-via-kubespray",, $(ALL_TESTS))
+TESTS=$(wildcard ./tests*/unit-tests/*)
 
 test: deps
 	$(info tests)
 	echo "Run all tests: $(TESTS)"
-	for test in $(TESTS); do \
+	@for test in $(TESTS); do \
 		echo "Running Test: $$test"; \
-		pushd $$test && \
-		make test && \
-		make clean && \
-		popd; \
+		make -C $$test && \
+		make -C $$test clean; \
 	done
 
 deps:
