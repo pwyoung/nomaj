@@ -25,3 +25,34 @@ The goal of this project is to allow a user to manage an entire project with:
   - on Mac
   - on Windows
 
+# TESTING
+This has been tested on:
+- Fedora31
+- PopOS 19.10
+
+# REQUIREMENTS
+- Python
+  - python3
+  - pip3
+  - modules:
+    - see ./requirements.txt
+- Vagrant Module
+  - vagrant (2.2.3)
+  - vagrant-libvirt (0.0.45-2) [ on Linux ]
+- Ansible Module (2.8.3)
+- Testing
+  - Some tests require passwordless-ssh to localhost
+    e.g. 'ssh localhost whoami' should work
+
+# SETUP EXAMPLES
+- PopOS-19.10:
+  - Requirements were satisfied with:
+    - sudo apt-get install python3-venv vagrant-libvirt ansible
+    - cd ./<nomaj_dir> && make deps
+  - Convenience/Optional:
+    - virt-manager was installed
+    - Python 'venv' was configured
+
+# Compiling and Testing
+To install the Python modules required and run the tests:
+- cd ./<nomaj_dir> && make
