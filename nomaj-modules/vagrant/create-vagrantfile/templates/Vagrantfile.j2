@@ -1,8 +1,4 @@
-Vagrant.require_version ">= 2.0.2"
-
-# sudo chmod 775 /var/lib/libvirt/images
-# sudo chgrp libvirt-qemu /var/lib/libvirt/images # qemu_group
-
+Vagrant.require_version ">= 2.2.3"
 
 require 'rbconfig'
 
@@ -222,37 +218,40 @@ Vagrant.configure("2") do |config|
                     {% set serial_id = 'serial#' + port|string %}
                     {% set nvme_disk_postfix = vagrant.global.libvirt_cfg.nvme_disk_postfix %}
             nvme_disk_{{ box_number }}_{{ port }} = libvirt_nvme_path + "{{ box.name }}_{{ port }}.{{ nvme_disk_postfix }}"
-            unless File.exist? ( nvme_disk_{{ box_number }}_{{ port }} )
-                if provider == "libvirt"
-                    cmd = "qemu-img create -f qcow2 #{ nvme_disk_{{ box_number }}_{{ port }} } {{ size }}M"
-                    ok = system(cmd)
-                    if ! ok
-                        puts "Command failed: #{cmd}"
-                        exit
-                    end
 
-                    {% if vagrant.global and
-                          vagrant.global.libvirt_cfg and
-                          vagrant.global.libvirt_cfg.qemu_group and
-                          vagrant.global.libvirt_cfg.qemu_group|length %}
-                    # If vagrant.global.libvirt_cfg.qemu_group is defined, set the NVME files to that group.
-                    qemu_group = "{{ vagrant.global.libvirt_cfg.qemu_group }}"
-                    cmd = "sudo chgrp -R #{ qemu_group } #{ nvme_disk_{{ box_number }}_{{ port }} }"
-                    ok = system("#{cmd}")
-                    if ! ok
-                        puts "Command failed: #{cmd}"
-                        exit
-                    end
-                    cmd = "sudo chmod -R g+rw #{ nvme_disk_{{ box_number }}_{{ port }} }"
-                    ok = system("#{cmd}")
-                    if ! ok
-                        puts "command failed: #{cmd}"
-                        exit
-                     end
-                    {% endif %}
+            config.trigger.before :up do |trigger|
+                unless File.exist? ( nvme_disk_{{ box_number }}_{{ port }} )
+                    if provider == "libvirt"
+                        cmd = "qemu-img create -f qcow2 #{ nvme_disk_{{ box_number }}_{{ port }} } {{ size }}M"
+                        ok = system(cmd)
+                        if ! ok
+                            puts "Command failed: #{cmd}"
+                            exit
+                        end
 
+                        {% if vagrant.global and
+                              vagrant.global.libvirt_cfg and
+                              vagrant.global.libvirt_cfg.qemu_group and
+                              vagrant.global.libvirt_cfg.qemu_group|length %}
+                        # If vagrant.global.libvirt_cfg.qemu_group is defined, set the NVME files to that group.
+                        qemu_group = "{{ vagrant.global.libvirt_cfg.qemu_group }}"
+                        cmd = "sudo chgrp -R #{ qemu_group } #{ nvme_disk_{{ box_number }}_{{ port }} }"
+                        ok = system("#{cmd}")
+                        if ! ok
+                            puts "Command failed: #{cmd}"
+                            exit
+                        end
+                        cmd = "sudo chmod -R g+rw #{ nvme_disk_{{ box_number }}_{{ port }} }"
+                        ok = system("#{cmd}")
+                        if ! ok
+                            puts "command failed: #{cmd}"
+                            exit
+                         end
+                        {% endif %}
+                    end
                 end
             end
+
 
             # Make disk file accessible as a device
             libvirt.qemuargs :value => "-drive"
@@ -260,15 +259,14 @@ Vagrant.configure("2") do |config|
             libvirt.qemuargs :value => "-device"
             libvirt.qemuargs :value => "nvme,drive={{ disk_id }},serial={{ serial_id }}"
 
+
             {# Vagrant Triggers were added in v2.1.0 #}
-            {% if vagrant.has_triggers %}
             # After destroying the box, remove the file we created
-            override.trigger.after :destroy do |trigger|
+            config.trigger.after :destroy do |trigger|
                 trigger.info = "Destroying file #{ nvme_disk_{{ box_number }}_{{ port }} }"
                 trigger.run = {inline: "rm -f #{ nvme_disk_{{ box_number }}_{{ port }} }"}
                 trigger.on_error = :halt
             end
-            {% endif %}
 
 	        {% endfor %} {# for key, val in vagrant.global.nvme_disks.items() #}
 	    {% endif %}	{# if vagrant.global.nvme_disks | length #}
