@@ -75,6 +75,8 @@ This has been tested on:
   - Convenience/Optional:
     - virt-manager was installed
     - Python 'venv' was configured
+  - "Install" nomaj in $PATH
+    - sudo ln -s ...<path-to>/nomaj/nomaj /usr/local/bin/
 
 # Compiling and Testing
 To install the Python modules required and run the tests:
