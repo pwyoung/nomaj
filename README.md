@@ -36,12 +36,15 @@ This has been tested on:
   - pip3
   - modules:
     - see ./requirements.txt
-- Vagrant Module
+- Nomaj Ansible Module
+  - Ansible (2.8.3)
+- Nomaj Vagrant Module
   - vagrant (2.2.3)
-  - vagrant-libvirt (0.0.45-2) [ on Linux ]
-- Ansible Module (2.8.3)
-- Libvirt (on Linux)
-  - QEMU/Session
+  - On Linux
+    - If using (default) Libvirt Virtualization
+      - Libvirt (5.4.0)
+      - vagrant-libvirt (0.0.45-2) [ on Linux ]
+      - Working QEMU/Session (see below)
 - Testing
   - Some tests require passwordless-ssh to localhost
     e.g. 'ssh localhost whoami' should work
@@ -79,7 +82,6 @@ This has been tested on:
   - "Install" nomaj in $PATH
     - sudo ln -s ...<path-to>/nomaj/nomaj /usr/local/bin/
 
-# Compiling and Testing
+# Testing
 To install the Python modules required and run the tests:
 - cd ./<nomaj_dir> && make
-

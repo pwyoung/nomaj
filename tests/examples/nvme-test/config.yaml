@@ -7,7 +7,6 @@ ansible:
         group_a:
           hosts:
             node-1: null
-            node-2: null
         group_b:
           hosts:
             node-1: null
@@ -17,7 +16,6 @@ ansible:
             group_b: null
       hosts:
         node-1: null
-        node-2: null
       vars:
         ansible_python_interpreter: /usr/bin/python3
   playbooks:
@@ -32,11 +30,10 @@ ansible:
     src: https://github.com/pwyoung/ansible-role-sanity-check
     version: 0.0.2
 generic:
-  project_namespace: test-basic
+  project_namespace: test-module-make
 vagrant:
   boxes:
   - name: node-1
-  - name: node-2
   global:
     boot_timeout: 300
     cpus: 4
@@ -47,7 +44,8 @@ vagrant:
       enabled: true
       machine_type: q35
       nvme_disk_id_prefix: drv
-      nvme_disk_path: $HOME/.local/share/libvirt/images/
+#      nvme_disk_path: $HOME/.local/share/libvirt/images/
+      nvme_disk_path: images/
       nvme_disk_postfix: qcow2
     memory: 4096
     nvme_disks:

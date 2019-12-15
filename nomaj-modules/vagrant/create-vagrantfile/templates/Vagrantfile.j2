@@ -204,33 +204,30 @@ Vagrant.configure("2") do |config|
                     {% set nvme_disk_postfix = vagrant.global.libvirt_cfg.nvme_disk_postfix %}
             nvme_disk_{{ box_number }}_{{ port }} = libvirt_nvme_path + "{{ box.name }}_{{ port }}.{{ nvme_disk_postfix }}"
 
+            # Create the disk file
             override.trigger.before :up do |trigger|
                 unless File.exist? ( nvme_disk_{{ box_number }}_{{ port }} )
                     if provider == "libvirt"
+                        trigger.info = "Creating file #{ nvme_disk_{{ box_number }}_{{ port }} }"
                         cmd = "qemu-img create -f qcow2 #{ nvme_disk_{{ box_number }}_{{ port }} } {{ size }}M"
-                        ok = system(cmd)
-                        if ! ok
-                            puts "Command failed: #{cmd}"
-                            exit
-                        end
+                        trigger.run = {inline: "#{ cmd }"}
+                        trigger.on_error = :halt
                     end
                 end
             end
 
-            override.trigger.before :up do |trigger|
-                # Make disk file accessible as a device
-                libvirt.qemuargs :value => "-drive"
-                libvirt.qemuargs :value => "file=#{ nvme_disk_{{ box_number }}_{{ port }} },if=none,id={{ disk_id }}"
-                libvirt.qemuargs :value => "-device"
-                libvirt.qemuargs :value => "nvme,drive={{ disk_id }},serial={{ serial_id }}"
-            end
-
-            # After destroying the box, remove the file we created
+            # After destroying the box, remove the disk file we created
             override.trigger.after :destroy do |trigger|
                 trigger.info = "Destroying file #{ nvme_disk_{{ box_number }}_{{ port }} }"
                 trigger.run = {inline: "rm -f #{ nvme_disk_{{ box_number }}_{{ port }} }"}
                 trigger.on_error = :halt
             end
+
+            # Mount the disk file as a device
+            libvirt.qemuargs :value => "-drive"
+            libvirt.qemuargs :value => "file=#{ nvme_disk_{{ box_number }}_{{ port }} },if=none,id={{ disk_id }}"
+            libvirt.qemuargs :value => "-device"
+            libvirt.qemuargs :value => "nvme,drive={{ disk_id }},serial={{ serial_id }}"
 
 	        {% endfor %} {# for key, val in vagrant.global.nvme_disks.items() #}
 	    {% endif %}	{# if vagrant.global.nvme_disks | length #}

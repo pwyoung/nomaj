@@ -1,6 +1,6 @@
 ---
 generic:
-  project_namespace: test-example-k8s-via-kubespray
+  project_namespace: example-k8s-via-kubespray
 
 vagrant:
   boxes:
