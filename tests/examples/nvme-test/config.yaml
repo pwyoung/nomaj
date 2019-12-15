@@ -30,7 +30,7 @@ ansible:
     src: https://github.com/pwyoung/ansible-role-sanity-check
     version: 0.0.2
 generic:
-  project_namespace: test-module-make
+  project_namespace: nvme-test
 vagrant:
   boxes:
   - name: node-1
@@ -44,7 +44,7 @@ vagrant:
       enabled: true
       machine_type: q35
       nvme_disk_id_prefix: drv
-#      nvme_disk_path: $HOME/.local/share/libvirt/images/
+#     nvme_disk_path: $HOME/.local/share/libvirt/images/
       nvme_disk_path: images/
       nvme_disk_postfix: qcow2
     memory: 4096
