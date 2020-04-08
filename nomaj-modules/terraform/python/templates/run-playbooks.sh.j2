@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# Exit when any command fails
+set -e
+
+ANSIBLE_DIR="{{ ansible_dir }}"
+cd $ANSIBLE_DIR
+
+{% for item in playbooks %}
+# {{ item.name }}
+ansible-playbook \
+    -i {{ inventory_file }} \
+    -e @{{ extra_vars_file }} \
+    -e '{"ANSIBLE_DIR":"{{ ansible_dir }}"}' \
+    {{ playbook_dir }}/{{ item.name }}/{{ item.entry | default("site.yml") }}
+
+{% endfor %}
+

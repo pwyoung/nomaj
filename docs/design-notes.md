@@ -36,7 +36,7 @@
   - To add another nomaj-module, just:
     - A) Add the module to this project in nomaj-modules
     - B) Create a global module in ~/.nomaj/nomaj-modules
-    - C) Create a per-project module in your <dir-you-call-nomak-from>/nomaj-modules/
+    - C) Create a per-project module in your <dir-you-call-nomaj-from>/nomaj-modules/
 
 # TODO
 

@@ -1,0 +1,11 @@
+---
+
+{% if roles is defined and roles is not none and roles|length > 0 %}
+    {% for role in roles %}
+- src: {{ role.src }}
+  name: {{ role.name }}
+  scm: git
+  version: {{ role.version }}
+    {% endfor %}
+{% endif %}
+
