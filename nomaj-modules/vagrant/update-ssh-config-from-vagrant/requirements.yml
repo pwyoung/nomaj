@@ -7,4 +7,5 @@
 
 - src: https://github.com/pwyoung/update_ssh_config_vagrant.git
   name: mcgrof.update_ssh_config_vagrant
-  version: use-vagrant-status
+  version: v4.0.6
+#  version: use-vagrant-status

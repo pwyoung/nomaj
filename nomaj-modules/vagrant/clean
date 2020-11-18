@@ -24,11 +24,13 @@ class CleanVagrant:
 
     def clean_vagrant(self):
         print("Destroying Vagrant machines from dir: " + os.getcwd())
-        cmd = "vagrant destroy -f"
-        run_command( cmd )
 
         # Show status
-        cmd = "vagrant status || true"
+        cmd = "vagrant status"
+        run_command( cmd )
+
+        # Destroy machines
+        cmd = "vagrant destroy -f"
         run_command( cmd )
 
 def main(argv):

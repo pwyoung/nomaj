@@ -14,3 +14,4 @@ test: deps
 deps:
 	$(info deps)
 	pip3 -q install -r requirements.txt
+
