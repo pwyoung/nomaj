@@ -42,3 +42,10 @@ The goal of this project is to allow a user to manage an entire project with:
     - Note: VirtualBox works too if the security implications bother you.
     - echo 'allow virbr0' | sudo tee /etc/qemu/bridge.conf
     - sudo chmod u+s /usr/lib/qemu/qemu-bridge-helper
+
+# Installation
+- Put something like the following in your login script
+NOMAJ_HOME=/home/$USER/git/nomaj
+if [ -e $NOMAJ_HOME ]; then
+    export PATH=$PATH:$NOMAJ_HOME
+fi
