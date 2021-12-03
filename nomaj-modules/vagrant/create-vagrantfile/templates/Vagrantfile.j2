@@ -170,6 +170,7 @@ Vagrant.configure("2") do |config|
             override.vm.boot_timeout = {{ vagrant.global.boot_timeout }}
             libvirt.watchdog :model => 'i6300esb', :action => 'reset'
             libvirt.qemu_use_session = true
+            libvirt.uri = 'qemu:///session' # This is supposedly the default, but is not taking effect as of 20211202
             libvirt.memory = {{ vagrant.global.memory }}
             libvirt.cpus = {{ vagrant.global.cpus }}
        	    libvirt.emulator_path = "{{ vagrant.global.libvirt_cfg.emulator_path }}"
