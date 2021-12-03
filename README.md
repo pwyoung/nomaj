@@ -23,17 +23,19 @@ The goal of this project is to allow a user to manage an entire project with:
   - DockerCompose
 
 # REQUIREMENTS
-- Python3 with pip3
-- "Nomaj Ansible Module" requires:
-  - Ansible (2.8.3+)
-  - /usr/bin/python should exist
-  - The test for this module requires passwordless-ssh to localhost
-    e.g. 'ssh localhost whoami' should work
+- Python
+  - Python version 3 with pip3
+- Ansible
+  - "Nomaj Ansible Module" requires:
+    - Ansible (2.8.3+)
+    - /usr/bin/python should exist
+    - The test for this module requires passwordless-ssh to localhost
+      
+      ***e.g. ```ssh localhost whoami``` should work***
 - "Nomaj Vagrant Module" requires:
   - vagrant (2.2.3+)
   - On Linux
     - Libvirt (5.4.0+) with working QEMU/Session
-  - ~/.ssh/config should exist
 
 # Examples of how to meet requirements
 - On PopOS/Ubuntu
@@ -45,7 +47,7 @@ The goal of this project is to allow a user to manage an entire project with:
 
 # Installation
 - Put something like the following in your login script
-```
+``` 
 NOMAJ_HOME=/home/$USER/git/nomaj
 if [ -e $NOMAJ_HOME ]; then 
     export PATH=$PATH:$NOMAJ_HOME; 
