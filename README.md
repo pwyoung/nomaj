@@ -37,7 +37,7 @@ The goal of this project is to allow a user to manage an entire project with:
 
 # Examples of how to meet requirements
 - On PopOS/Ubuntu
-  - sudo update && sudo apt install python3-pip ansible vagrant gnome-boxes
+  - sudo apt update && sudo apt install python3-pip ansible vagrant gnome-boxes
   - Allow non-root user to use the QEMU/Session resources
     - Note: VirtualBox works too if the security implications bother you.
     - echo 'allow virbr0' | sudo tee /etc/qemu/bridge.conf
@@ -45,7 +45,8 @@ The goal of this project is to allow a user to manage an entire project with:
 
 # Installation
 - Put something like the following in your login script
+```
 NOMAJ_HOME=/home/$USER/git/nomaj
-if [ -e $NOMAJ_HOME ]; then
-    export PATH=$PATH:$NOMAJ_HOME
+if [ -e $NOMAJ_HOME ]; then 
+    export PATH=$PATH:$NOMAJ_HOME; 
 fi
