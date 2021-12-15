@@ -1,7 +1,10 @@
 .PHONY=deps test
 
 TESTS=$(wildcard ./tests*/unit-tests/*)
-TESTS=./tests/unit-tests/module-make
+# Edit this during dev to run just one test
+#TESTS=./tests/unit-tests/module-make
+#TESTS=./tests/unit-tests/module-ansible
+#TESTS=./tests/unit-tests/module-vagrant
 
 SSHCFG=$$HOME/.ssh/config
 
@@ -16,7 +19,19 @@ test: deps
 		make -C $$test clean; \
 	done
 
-deps:
-	$(info deps)
+python:
+	$(info Check Python is Python3)
+	python --version | grep 'Python 3'
+	$(info Install pips)
 	pip3 -q install -r requirements.txt
+
+ssh-config:
+	$(info SSH config file must exist)
 	test -f $(SSHCFG) || echo "creating $(SSHCFG)" && touch $(SSHCFG)
+
+passwordless-ssh:
+	$(info Passwordless SSH must work)
+	ssh localhost whoami
+
+deps: python ssh-config passwordless-ssh
+	$(info deps)
