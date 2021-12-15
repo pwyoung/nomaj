@@ -65,7 +65,7 @@ cd $NOMAJ_HOME && make
 ``` 
 
 # Running nomaj
-There are documents on nomaj link:../docs[here] 
+There are documents on nomaj link:https://github.com/pwyoung/nomaj/tree/master/docs[here] 
 
 # A simple example of running nomaj
 Nomaj is designed to be run normally with no arguments so that it can assume a few things, such as that the config file is in the current directory.
