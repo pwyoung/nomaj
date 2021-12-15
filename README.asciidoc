@@ -49,8 +49,7 @@ The goal of this project is to allow a user to manage an entire project with:
     - VirtualBox
 
 # Examples of how to meet requirements
-- On PopOS/Ubuntu, just fetch and run this script:
-    - https://github.com/pwyoung/computer-setup/blob/master/home/bin/setup-popos-computer.sh
+- On PopOS/Ubuntu, just fetch and run link:https://github.com/pwyoung/computer-setup/blob/master/home/bin/setup-popos-computer.sh[this script]
 
 # Installation
 Put something like the following in your login script
@@ -66,7 +65,8 @@ cd $NOMAJ_HOME && make
 ``` 
 
 # Running nomaj
-There are documents on nomaj [here](../docs/) 
+There are documents on nomaj link:../docs[here] 
+
 # A simple example of running nomaj
 Nomaj is designed to be run normally with no arguments so that it can assume a few things, such as that the config file is in the current directory.
 
