@@ -7,15 +7,16 @@
   INPUTS:
     - CONFIG_FILE:
         user-specified input file
-        defaults to $(pwd)/config.yaml
+        The default is $(pwd)/config.yaml
     - OVERRIDE_FILE:
         user-specified overrides of CONFIG_FILE
-        defaults to $(pwd)/overrides.yaml
+        The default is $(pwd)/overrides.yaml
     - BUILD_DIR:
         user-specified output directory for the project
         defaults to $(pwd)/build
     - MODULE
         Module to execute
+        The default is 'make'
     - MODULE_SCRIPT
         Specifies the script in the module to run
         The default is 'run'
@@ -25,7 +26,9 @@
         Stored in BUILD_DIR/config.yaml
 ```
 
-Just call "nomaj -m MODULE" from your project and it will:
+The module nomaj runs defaults to 'make' but it can be specified.
+Modules are processed as follows.
+Given an execution "nomaj -m MODULE", nomaj will do the following
 ```
 - Find the local ./config.yaml
 - Look for an optional ./overrides.yaml
@@ -39,9 +42,5 @@ Just call "nomaj -m MODULE" from your project and it will:
   - Create the module dir, BUILD_DIR/<module>
   - Set the working dir to the module dir
   - Run the script for the module
-
-- Defaults:
-  - The default module name is 'make'
-  - The default script is 'run'
 ```
 See the tests for example usage.
