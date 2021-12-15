@@ -67,7 +67,6 @@ cd $NOMAJ_HOME && make
 
 # Running nomaj
 There are documents on nomaj [here](../docs/) 
-
 # A simple example of running nomaj
 Nomaj is designed to be run normally with no arguments so that it can assume a few things, such as that the config file is in the current directory.
 
@@ -90,6 +89,7 @@ Nomaj intentionally exposes what it does so that you can directly use the underl
 cd /home/$USER/git/nomaj/tests/unit-tests/module-vagrant
 # Go into the directory for the component nomaj set up for us
 cd ./build/vagrant
+# Run a command against the component, in this case "vagrant"
 vagrant status
 ```
 
