@@ -3,53 +3,53 @@ There's no magic here.
 
 # GOAL
 The goal of this project is to allow a user to manage an entire project with:
-- a single config file
-- a single override file (e.g. to force local environment settings)
-- a simple, flexible, intuitive way to process the config file
+* a single config file
+* a single override file (e.g. to force local environment settings)
+* a simple, flexible, intuitive way to process the config file
 
 # DOCS
-- See ./docs/algorithm.md for details of how the program works
-- See ./tests/examples/ for example usage:
-  - ./tests/examples/example-basic/README.md
-  - ./tests/examples/example-k8s-via-kubespray/README.md
+* See ./docs/algorithm.md for details of how the program works
+* See ./tests/examples/ for example usage:
+** ./tests/examples/example-basic/README.md
+** ./tests/examples/example-k8s-via-kubespray/README.md
 
 # TODO
-- Additional Tests
-  - Demonstrate how to add a local user-defined module
-    - Just create a dir in ~/.nomaj/...
-    - Run the code
-- Additional built-in modules:
-  - Terraform
-  - DockerCompose
+* Additional Tests
+** Demonstrate how to add a local user-defined module
+*** Just create a dir in ~/.nomaj/...
+*** Run the code
+** Additional built-in modules:
+*** Terraform
+*** DockerCompose
 
 # HIGH-LEVEL REQUIREMENTS
-- Python
-- Ansible
-- Vagrant
-- Something to run VMs
+* Python
+* Ansible
+* Vagrant
+* Something to run VMs
 
 # DETAILED REQUIREMENTS
-- "Nomaj Ansible Module" requires:
-  - Ansible (2.8.3+)
-  - Python version 3 with pip3
-  - /usr/bin/python should exist
-  - Password-less SSH to localhost (e.g. "ssh localhost whoami") should work
-- "Nomaj Vagrant Module" requires:
-  - vagrant (2.2.3+)
-  - On Linux
-    - Libvirt (5.4.0+) with working QEMU/Session
-- Local execution of VMs requires a Virtual Machine Manager:
-  - Supported for Linux:
-    - KVM/QEMU
-    - VirtualBox
-  - Supported for Mac/OS:
-    - VirtualBox
-  - Supported for Windows:
-    - HyperV
-    - VirtualBox
+* "Nomaj Ansible Module" requires:
+**  Ansible (2.8.3+)
+**  Python version 3 with pip3
+**  /usr/bin/python should exist
+**  Password-less SSH to localhost (e.g. "ssh localhost whoami") should work
+* "Nomaj Vagrant Module" requires:
+**  vagrant (2.2.3+)
+**  On Linux
+***  Libvirt (5.4.0+) with working QEMU/Session
+* Local execution of VMs requires a Virtual Machine Manager:
+**  Supported for Linux:
+***  KVM/QEMU
+***  VirtualBox
+**  Supported for Mac/OS:
+***  VirtualBox
+**  Supported for Windows:
+***  HyperV
+***  VirtualBox
 
 # Examples of how to meet requirements
-- On PopOS/Ubuntu, just fetch and run link:https://github.com/pwyoung/computer-setup/blob/master/home/bin/setup-popos-computer.sh[this script]
+* On PopOS/Ubuntu, just fetch and run link:https://github.com/pwyoung/computer-setup/blob/master/home/bin/setup-popos-computer.sh[this script]
 
 # Installation
 Put something like the following in your login script
@@ -62,15 +62,15 @@ fi
 Run setup and tests via
 ```
 cd $NOMAJ_HOME && make
-``` 
+```
 
 # Running nomaj
-There are documents on nomaj link:https://github.com/pwyoung/nomaj/tree/master/docs[here] 
+There are documents on nomaj link:https://github.com/pwyoung/nomaj/tree/master/docs[here]
 
 # A simple example of running nomaj
 Nomaj is designed to be run normally with no arguments so that it can assume a few things, such as that the config file is in the current directory.
 
-You can see examples of this by calling the unit tests manually by going into their directories and just running "nomaj". 
+You can see examples of this by calling the unit tests manually by going into their directories and just running "nomaj".
 
 An example of doing this would be:
 
@@ -92,4 +92,3 @@ cd ./build/vagrant
 # Run a command against the component, in this case "vagrant"
 vagrant status
 ```
-
