@@ -116,9 +116,12 @@ nomaj
 # Or, watch the Kubespray log while it runs
 ssh k-1 tail -99f ./create-cluster.log
 
-# SSH into the cluster
+# SSH into the cluster and run kubectl
 ssh k-1
+sudo su -
+kubectl get nodes
 ```
+
 ** Review Nomaj config file
 ```
 # Go the the folder for the project
