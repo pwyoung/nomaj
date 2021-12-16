@@ -113,6 +113,9 @@ nomaj
 # - Kubespray to be installed and configured on the first VM
 # - Kubespray to be run on the first VM which configures and runs K8S on all VMs
 
+# Or, watch the Kubespray log while it runs
+ssh k-1 tail -99f ./create-cluster.log
+
 # SSH into the cluster
 ssh k-1
 ```
