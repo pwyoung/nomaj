@@ -105,7 +105,12 @@ cd /home/$USER/git/nomaj/examples/k8s-via-kubespray
 # Run the project
 nomaj
 
-# Wait a while for the VMs to be created and for Ansible to be installed in them
+# Wait a while for 
+# - the VMs to be created 
+# - For the VMs to be configured (with packages, networking, etc)
+# - For Ansible to be installed on the first VM 
+# - For Kubespray to be installed and configured on the first VM
+# - For Kubespray to be run on the first VM which configures and runs K8S on all VMs
 
 # SSH into the cluster
 ssh k-1
