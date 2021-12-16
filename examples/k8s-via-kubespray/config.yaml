@@ -87,7 +87,8 @@ ansible:
     - name: "ansible-playbook-deploy-kubespray"
       scm: "git"
       src: "https://github.com/pwyoung/ansible-playbook-deploy-kubespray.git"
-      version: "master"
+      # version: "master" # was version 2.11.0
+      version: "ks-v2.17.1"
       #src: "file:///home/pyoung/git/current/ansible-playbook-deploy-kubespray"
       #version: "dev"
   inventory:
