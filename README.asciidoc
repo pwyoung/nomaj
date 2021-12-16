@@ -92,3 +92,47 @@ cd ./build/vagrant
 # Run a command against the component, in this case "vagrant"
 vagrant status
 ```
+
+# An even more simple example of something much more complex
+
+You can create a "real" working Kubernetes cluster as follows
+
+* Create the cluster
+```
+# Go the the folder for the project
+cd /home/$USER/git/nomaj/examples/k8s-via-kubespray
+
+# Run the project
+nomaj
+
+# Wait a while for the VMs to be created and for Ansible to be installed in them
+
+# SSH into the cluster
+ssh k-1
+```
+** Review Nomaj config file
+```
+# Go the the folder for the project
+cd /home/$USER/git/nomaj/examples/k8s-via-kubespray
+
+cat ./config.yaml
+```
+
+* Cleanup
+```
+# Go the the folder for the project
+cd /home/$USER/git/nomaj/examples/k8s-via-kubespray
+
+# Tell nomaj to destroy the VMs
+nomaj -m vagrant -x clean
+rm -rf ./build
+```
+
+* Using Make files
+The above can all be done with the included Makefiles (which are helpful for speeding up dev and remembering commands)
+```
+# Go the the folder for the project
+cd /home/$USER/git/nomaj/examples/k8s-via-kubespray
+make #create the cluster
+make clean #destroy the cluster
+```
