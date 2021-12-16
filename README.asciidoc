@@ -108,6 +108,7 @@ nomaj
 # Wait a while for 
 # - the VMs to be created 
 # - the VMs to be configured (with packages, networking, disks, etc)
+# - the local ~/.ssh/config to be configured to allow direct SSH to the VMs
 # - Ansible to be installed on the first VM 
 # - Kubespray to be installed and configured on the first VM
 # - Kubespray to be run on the first VM which configures and runs K8S on all VMs
