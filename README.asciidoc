@@ -128,8 +128,9 @@ nomaj -m vagrant -x clean
 rm -rf ./build
 ```
 
-* Using Make files
-The above can all be done with the included Makefiles (which are helpful for speeding up dev and remembering commands)
+* Using Make
+** The above can all be done with the included Make files which are in the examples. 
+** They speed up dev and are helpful for remembering commands.
 ```
 # Go the the folder for the project
 cd /home/$USER/git/nomaj/examples/k8s-via-kubespray
