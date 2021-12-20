@@ -14,6 +14,8 @@ vagrant:
     cpus: 4
     boot_timeout: 300
     nvme_disks:
+      data0:
+        size: 102400
       data1:
         size: 102400
       data2:
@@ -21,38 +23,6 @@ vagrant:
       data3:
         size: 102400
       data4:
-        size: 102400
-      data5:
-        size: 102400
-      data6:
-        size: 102400
-      data7:
-        size: 102400
-      data8:
-        size: 102400
-      data9:
-        size: 102400
-      data10:
-        size: 102400
-      data11:
-        size: 102400
-      data12:
-        size: 102400
-      data13:
-        size: 102400
-      data14:
-        size: 102400
-      data15:
-        size: 102400
-      data16:
-        size: 102400
-      data17:
-        size: 102400
-      data18:
-        size: 102400
-      data19:
-        size: 102400
-      data20:
         size: 102400
     virtualbox_cfg:
       enabled: True # If not true then omit from Vagrantfile
@@ -78,7 +48,7 @@ ansible:
     - name: "ansible-role-mount-disks"
       src: "https://github.com/pwyoung/ansible-role-mount-disks.git"
       scm: "git"
-      version: "master"
+      version: "v1.0"
     - name: "create_partition"
       src: "https://github.com/mcgrof/create_partition.git"
       scm: "git"
@@ -87,10 +57,8 @@ ansible:
     - name: "ansible-playbook-deploy-kubespray"
       scm: "git"
       src: "https://github.com/pwyoung/ansible-playbook-deploy-kubespray.git"
-      # version: "master" # was version 2.11.0
+      #version: "master" # Kubespray v2.11.0 as of 20211215
       version: "ks-v2.17.1"
-      #src: "file:///home/pyoung/git/current/ansible-playbook-deploy-kubespray"
-      #version: "dev"
   inventory:
     all:
       vars:
@@ -127,23 +95,18 @@ ansible:
         calico-rr:
           hosts: {}
   extra_vars:
+    #################################################################################
     # Kubespray generic/download parameters:
     #   Notes:
     #     This has things like helm_version which is not listed in roles/kubernetes-apps/helm/defaults/main.yml
     #   URL:
     #     https://github.com/kubernetes-sigs/kubespray/blob/master/roles/download/defaults/main.yml
-    #
+    #################################################################################
     # Helm
     #   https://github.com/kubernetes-sigs/kubespray/blob/master/roles/kubernetes-apps/helm/defaults/main.yml
     helm_enabled: true
-    #
-    # Local Volumes
-    #   https://github.com/kubernetes-sigs/kubespray/tree/master/roles/kubernetes-apps/external_provisioner/local_volume_provisioner
-    local_volume_provisioner_enabled: true
-    local_volume_provisioner_storage_classes:
-      local-storage:
-        host_dir: /mnt/disks
-        mount_dir: /mnt/disks
+    #################################################################################
+    # You can set other Kubespray variables too, such as:
     #
     # kubespray_ingress_nginx_enabled
     # dns_cores_per_replica
@@ -152,3 +115,49 @@ ansible:
     # dns_mode
     # cluster_name
     # kube_network_plugin
+    #################################################################################
+    # Local Volumes
+    #   https://github.com/kubernetes-sigs/kubespray/tree/master/roles/kubernetes-apps/external_provisioner/local_volume_provisioner
+    local_volume_provisioner_enabled: true
+    local_volume_provisioner_storage_classes:
+      local-storage:
+        host_dir: /mnt/disks
+        mount_dir: /mnt/disks
+    #################################################################################
+    # Partition and mount disks using https://github.com/pwyoung/ansible-role-mount-disks
+    #
+    # kubespray_ingress_nginx_enabled
+    # dns_cores_per_replica
+    # dns_nodes_per_replica
+    # populate_inventory_to_hosts_file=false
+    # dns_mode
+    # cluster_name
+    # kube_network_plugin
+    #################################################################################
+    # Local Volumes
+    #   https://github.com/kubernetes-sigs/kubespray/tree/master/roles/kubernetes-apps/external_provisioner/local_volume_provisioner
+    local_volume_provisioner_enabled: true
+    local_volume_provisioner_storage_classes:
+      local-storage:
+        host_dir: /mnt/disks
+        mount_dir: /mnt/disks
+    #################################################################################
+    # Partition and mount disks using https://github.com/pwyoung/ansible-role-mount-disks
+    create_partition_data:
+      defaults:
+            disk_setup_fstype: "xfs"
+            disk_setup_label: "truncated"
+            disk_setup_fs_opts: "-L truncated"
+            disk_setup_user: "vagrant"
+            disk_setup_group: "vagrant"
+      create_partitions:
+        -   disk_setup_device: "/dev/nvme0n1"
+            disk_setup_path: "/mnt/disks/disk_0"
+        -   disk_setup_device: "/dev/nvme1n1"
+            disk_setup_path: "/mnt/disks/disk_1"
+        -   disk_setup_device: "/dev/nvme2n1"
+            disk_setup_path: "/mnt/disks/disk_2"
+        -   disk_setup_device: "/dev/nvme3n1"
+            disk_setup_path: "/mnt/disks/disk_3"
+        -   disk_setup_device: "/dev/nvme4n1"
+            disk_setup_path: "/mnt/disks/disk_4"
