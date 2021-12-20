@@ -112,22 +112,26 @@ nomaj
 # - Ansible to be installed on the first VM 
 # - Kubespray to be installed and configured on the first VM
 # - Kubespray to be run on the first VM which configures and runs K8S on all VMs
-
-# Or, watch the Kubespray log while it runs
-ssh k-1 tail -99f ./create-cluster.log
-
-# SSH into the cluster and run kubectl
-ssh k-1
-sudo su -
-kubectl get nodes
 ```
 
-** Review Nomaj config file
+** Optional: Review Nomaj config file
 ```
 # Go the the folder for the project
 cd /home/$USER/git/nomaj/examples/k8s-via-kubespray
 
 cat ./config.yaml
+```
+
+** Optional: Review logs and examine the installation
+```
+# Watch the Kubespray log while it runs
+ssh k-1 tail -99f ./create-cluster.log
+
+# SSH into the cluster and examine it
+ssh k-1
+sudo su -
+kubectl get nodes,storageclass
+kubectl describe nodes
 ```
 
 * Cleanup
