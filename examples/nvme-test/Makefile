@@ -1,5 +1,5 @@
 MAKEFILE_PATH=$(dir $(realpath $(firstword $(MAKEFILE_LIST))))
-NOMAJ=$(MAKEFILE_PATH)../../../nomaj
+NOMAJ='nomaj' # Assumes nomaj is in $PATH
 .PHONY=test clean
 
 test:
