@@ -29,7 +29,7 @@ ssh-config:
 
 passwordless-ssh:
 	$(info Passwordless SSH must work)
-	ssh localhost whoami
+	ssh localhost whoami || echo 'WARNING: passwordless SSH failed.'
 
 deps: python3 ssh-config passwordless-ssh
 	$(info deps)
