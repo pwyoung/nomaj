@@ -1,7 +1,7 @@
 MAKEFILE_PATH=$(dir $(realpath $(firstword $(MAKEFILE_LIST))))
 .PHONY=test clean ansible FORCE
 
-#NOMAJ=$(MAKEFILE_PATH)/../../../nomaj
+#NOMAJ=$(MAKEFILE_PATH)/../../../nomaj/nomaj
 NOMAJ='nomaj' # Assumes nomaj is in $PATH
 
 

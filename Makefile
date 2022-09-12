@@ -19,9 +19,7 @@ test: deps
 		make -C $$test clean; \
 	done
 
-python:
-	$(info Check Python is Python3)
-	python --version | grep 'Python 3'
+python3:
 	$(info Install pips)
 	pip3 -q install -r requirements.txt
 
@@ -33,5 +31,5 @@ passwordless-ssh:
 	$(info Passwordless SSH must work)
 	ssh localhost whoami
 
-deps: python ssh-config passwordless-ssh
+deps: python3 ssh-config passwordless-ssh
 	$(info deps)
