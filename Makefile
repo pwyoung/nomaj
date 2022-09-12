@@ -29,7 +29,7 @@ ssh-config:
 
 passwordless-ssh:
 	$(info Passwordless SSH must work)
-	ssh localhost whoami || echo 'WARNING: passwordless SSH failed.'
+	ssh localhost whoami || echo 'WARNING: passwordless SSH failed. This is used by complex Ansible playbooks such as the K8S installer.'
 
 deps: python3 ssh-config passwordless-ssh
 	$(info deps)
