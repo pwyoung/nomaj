@@ -28,8 +28,12 @@ ssh-config:
 	test -f $(SSHCFG) || echo "creating $(SSHCFG)" && touch $(SSHCFG)
 
 passwordless-ssh:
-	$(info Passwordless SSH must work)
-	ssh localhost whoami || echo 'WARNING: passwordless SSH failed. This is used by complex Ansible playbooks such as the K8S installer.'
+	$(info Passwordless SSH must work for complex playbooks)
+	ssh localhost whoami || echo 'WARNING: passwordless SSH failed. This is used by playbooks such as the K8S installer.'
 
-deps: python3 ssh-config passwordless-ssh
+gsed-on-mac:
+	$(info Require 'gsed' on Mac/OSX)
+	if uname | grep Darwin &>/dev/null; then gsed --version &>/dev/null; fi
+
+deps: python3 ssh-config passwordless-ssh gsed-on-mac
 	$(info deps)
