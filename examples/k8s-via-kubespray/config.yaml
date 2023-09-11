@@ -7,6 +7,8 @@
 #     "ansible-playbook-deploy-kubespray" https://github.com/pwyoung/ansible-playbook-deploy-kubespray.git"
 #   Older versions can be selected via the parameter here:
 #     https://github.com/kubernetes-sigs/kubespray/blob/master/inventory/sample/group_vars/k8s_cluster/k8s-cluster.yml#L20
+#   The Ansible role needs to be updated here:
+#     https://github.com/pwyoung/ansible-playbook-deploy-kubespray/blob/master/roles/install-kubespray/defaults/main.yml
 generic:
   project_namespace: k8s-via-kubespray
 
@@ -15,8 +17,6 @@ vagrant:
     - name: k-1
     - name: k-2
     - name: k-3
-#    - name: k-4
-#    - name: k-5
   global:
     memory: 4096
     cpus: 3
@@ -26,15 +26,9 @@ vagrant:
         size: 102400
       data1:
         size: 102400
-      #data2:
-      #  size: 102400
-      #data3:
-      #  size: 102400
-      #data4:
-      #  size: 102400
     virtualbox_cfg:
       enabled: True # If not true then omit from Vagrantfile
-      box: 'generic/ubuntu1804'
+      box: 'generic/ubuntu2204'
       enable_sse4: true
       nvme_disk_postfix: 'vdi' # can be vdi, vmdk, vhd
       nvme_disk_path: '.vagrant/nvme_disks/' # Default to a path relative to the Vagrantfile (common for VirtualBox)
@@ -42,7 +36,7 @@ vagrant:
       append_project_name_to_nvme_disk_path: 'true'
     libvirt_cfg:
       enabled: True # If not true then omit from Vagrantfile
-      box: 'generic/ubuntu1804'
+      box: 'generic/ubuntu2204'
       machine_type: 'q35'
       nvme_disk_postfix: 'qcow2'
       nvme_disk_id_prefix: 'drv'
@@ -65,8 +59,7 @@ ansible:
     - name: "ansible-playbook-deploy-kubespray"
       scm: "git"
       src: "https://github.com/pwyoung/ansible-playbook-deploy-kubespray.git"
-      #version: "master" # Kubespray v2.11.0 as of 20211215
-      version: "ks-v2.17.1"
+      version: "ks-v2.23.0"
   inventory:
     all:
       vars:
@@ -75,8 +68,6 @@ ansible:
         k-1:
         k-2:
         k-3:
-#        k-4:
-#        k-5:
       children:
         kube-master:
           hosts:
@@ -87,15 +78,11 @@ ansible:
             k-1:
             k-2:
             k-3:
-#            k-4:
-#            k-5:
         etcd:
           hosts:
             k-1:
             k-2:
             k-3:
-#            k-4:
-#            k-5:
         k8s-cluster:
           children:
             kube-master:
