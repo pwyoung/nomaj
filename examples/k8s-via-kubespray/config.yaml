@@ -1,4 +1,12 @@
 ---
+# https://github.com/kubernetes-sigs/kubespray
+# https://github.com/kubernetes-sigs/kubespray#requirements
+# Latest K8S version:
+#   https://kubernetes.io/releases/
+#   To bump, update the Ansible Playbook that runs Kubespray, below:
+#     "ansible-playbook-deploy-kubespray" https://github.com/pwyoung/ansible-playbook-deploy-kubespray.git"
+#   Older versions can be selected via the parameter here:
+#     https://github.com/kubernetes-sigs/kubespray/blob/master/inventory/sample/group_vars/k8s_cluster/k8s-cluster.yml#L20
 generic:
   project_namespace: k8s-via-kubespray
 
@@ -11,19 +19,19 @@ vagrant:
 #    - name: k-5
   global:
     memory: 4096
-    cpus: 4
+    cpus: 3
     boot_timeout: 300
     nvme_disks:
       data0:
         size: 102400
       data1:
         size: 102400
-      data2:
-        size: 102400
-      data3:
-        size: 102400
-      data4:
-        size: 102400
+      #data2:
+      #  size: 102400
+      #data3:
+      #  size: 102400
+      #data4:
+      #  size: 102400
     virtualbox_cfg:
       enabled: True # If not true then omit from Vagrantfile
       box: 'generic/ubuntu1804'
@@ -155,9 +163,9 @@ ansible:
             disk_setup_path: "/mnt/disks/disk_0"
         -   disk_setup_device: "/dev/nvme1n1"
             disk_setup_path: "/mnt/disks/disk_1"
-        -   disk_setup_device: "/dev/nvme2n1"
-            disk_setup_path: "/mnt/disks/disk_2"
-        -   disk_setup_device: "/dev/nvme3n1"
-            disk_setup_path: "/mnt/disks/disk_3"
-        -   disk_setup_device: "/dev/nvme4n1"
-            disk_setup_path: "/mnt/disks/disk_4"
+        #-   disk_setup_device: "/dev/nvme2n1"
+        #    disk_setup_path: "/mnt/disks/disk_2"
+        #-   disk_setup_device: "/dev/nvme3n1"
+        #    disk_setup_path: "/mnt/disks/disk_3"
+        #-   disk_setup_device: "/dev/nvme4n1"
+        #    disk_setup_path: "/mnt/disks/disk_4"
