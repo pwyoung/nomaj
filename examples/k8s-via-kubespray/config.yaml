@@ -17,9 +17,11 @@ vagrant:
     - name: k-1
     - name: k-2
     - name: k-3
+    - name: k-4
+    - name: k-5
   global:
     memory: 4096
-    cpus: 3
+    cpus: 2
     boot_timeout: 300
     nvme_disks:
       data0:
@@ -68,6 +70,8 @@ ansible:
         k-1:
         k-2:
         k-3:
+        k-4:
+        k-5:
       children:
         kube-master:
           hosts:
@@ -78,6 +82,8 @@ ansible:
             k-1:
             k-2:
             k-3:
+            k-4:
+            k-5:
         etcd:
           hosts:
             k-1:
