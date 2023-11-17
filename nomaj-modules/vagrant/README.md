@@ -14,4 +14,3 @@ This will:
 # Script: clean
 This will:
   - Destroy the Vagrant boxes (e.g. via 'vagrant destroy')
-  
