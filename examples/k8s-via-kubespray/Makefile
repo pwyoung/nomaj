@@ -20,3 +20,10 @@ clean: FORCE
 	cd $(MAKEFILE_PATH) && rm -rf ./build
 
 FORCE:
+
+
+# These are not in Nomaj (yet anyway)
+suspend:
+	cd $(MAKEFILE_PATH)build/vagrant && vagrant suspend
+resume:
+	cd $(MAKEFILE_PATH)build/vagrant && vagrant resume
