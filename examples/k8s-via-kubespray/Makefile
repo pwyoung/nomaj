@@ -4,26 +4,32 @@ MAKEFILE_PATH=$(dir $(realpath $(firstword $(MAKEFILE_LIST))))
 #NOMAJ=$(MAKEFILE_PATH)/../../../nomaj/nomaj
 NOMAJ='nomaj' # Assumes nomaj is in $PATH
 
+default: test
 
-test: FORCE
-#	cd $(MAKEFILE_PATH) && $(NOMAJ) -m vagrant
-#	cd $(MAKEFILE_PATH) && $(NOMAJ) -m ansible
-# 'nomaj' with no args defaults to '-m make'
-# which runs the equivalent of 'nomaj -v vagrant && nomaj -v ansible'
+FORCE:
+
+# 'nomaj' defaults args (if none are given) are '-m make'.
+# 'nomaj -m make' runs the equivalent of 'nomaj -v vagrant && nomaj -v ansible'
+build: FORCE
 	cd $(MAKEFILE_PATH) && $(NOMAJ)
 
-ansible: FORCE
-	cd $(MAKEFILE_PATH) && $(NOMAJ) -m ansible
+test: build
+	cd $(MAKEFILE_PATH)/bin && ./run_k8s_nomaj
 
 clean: FORCE
 	cd $(MAKEFILE_PATH) && $(NOMAJ) -m vagrant -x clean
 	cd $(MAKEFILE_PATH) && rm -rf ./build
+	vagrant global-status --prune
 
-FORCE:
+################################################################################
+# Conveniences
+################################################################################
 
+ansible: FORCE
+	cd $(MAKEFILE_PATH) && $(NOMAJ) -m ansible
 
-# These are not in Nomaj (yet anyway)
 suspend:
 	cd $(MAKEFILE_PATH)build/vagrant && vagrant suspend
+
 resume:
 	cd $(MAKEFILE_PATH)build/vagrant && vagrant resume
