@@ -1,10 +1,20 @@
 #!/bin/bash
 
-# GOAL
-#   Create a helper script to run K8S locally
+# PURPOSE
+# - Run 'nomaj -m vagrant' to ensure the VMs are up
+# - Create an SSH tunnel to the K8S "control-plane" node
+# - Copy the Kube config file to ~/.kube/config/local
 #
-# Assumptions
-#   Nomaj is in ~/git/nomaj
+# Requirements
+# - The nomaj repo is installed in ~/git/nomaj
+#   cd ~/git/nomaj/examples/k8s-via-kubespray && make
+# - "nomaj" is found in $PATH
+#   e.g. ~/.bash_profile has
+#   PATH=$PATH:~/git/nomaj
+# - The nomaj job was run already
+#   That job has added SSH alias "k-1" to ~/.ssh/config
+#   The following works: "ssh k-1 hostname"
+#   cd ~/git/nomaj/examples/k8s-via-kubespray && make
 
 set -e
 
@@ -64,7 +74,6 @@ use_kube_config_local() {
 
     return 0
 }
-
 
 start_vms
 tunnel_to_k8s
