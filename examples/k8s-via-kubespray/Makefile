@@ -4,7 +4,7 @@ MAKEFILE_PATH=$(dir $(realpath $(firstword $(MAKEFILE_LIST))))
 #NOMAJ=$(MAKEFILE_PATH)/../../../nomaj/nomaj
 NOMAJ='nomaj' # Assumes nomaj is in $PATH
 
-default: test
+default: build
 
 FORCE:
 
@@ -12,8 +12,9 @@ FORCE:
 # 'nomaj -m make' runs the equivalent of 'nomaj -v vagrant && nomaj -v ansible'
 build: FORCE
 	cd $(MAKEFILE_PATH) && $(NOMAJ)
+	cd $(MAKEFILE_PATH)/bin && ./run_k8s_nomaj
 
-test: build
+test: FORCE
 	cd $(MAKEFILE_PATH)/bin && ./run_k8s_nomaj
 
 clean: FORCE
