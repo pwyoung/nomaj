@@ -1,0 +1,114 @@
+#!/bin/bash
+
+set -e
+
+# Document steps to add local host
+
+# Get the IP of this host.
+# Assume we can match this
+ETH='eno'
+MASK='24'
+IP=$(ip a s | grep "\/$MASK" | grep "$ETH" | head -1 | awk '{print $2}' | cut -d'/' -f 1)
+
+if echo "IP is $IP" | egrep '192|10|172' &>/dev/null; then
+    echo "Using $IP"
+else
+    echo "IP seems invalid"
+    exit 1
+fi
+
+allow_passwordless_ssh_on_this_host() {
+    # Allow passwordless-SSH on the physical host
+    F=~/.tmp-sudoers
+    echo "$USER         ALL = (ALL) NOPASSWD: ALL" > $F
+    sudo cp $F /etc/sudoers.d/$USER
+
+    echo "Test: allow_passwordless_ssh_on_this_host"
+    sudo ls /root
+}
+
+test_ssh_to_control_node() {
+    echo "SSH to k-1"
+    echo "This should be set up by the nomaj job already"
+    echo "Test: test_ssh_to_control_node"
+    ssh k-1 'hostname && whoami'
+}
+
+# Edit ~/.ssh/config on control node so that
+# "ssh <IP>" will connect as the current/local
+check_control_ssh_config() {
+    F=~/.tmp-ssh-config
+
+    cat <<EOF > $F
+Host *
+  AddKeysToAgent yes
+  StrictHostKeyChecking no
+  UserKnownHostsFile /dev/null
+  IdentitiesOnly yes
+
+  # MULTIPLEXING CONNECTIONS (should speed up Ansible)
+  controlmaster auto
+  controlpath /tmp/ssh-%r@%h-%l:%p
+  ControlPersist yes
+  ControlPersist 60m
+
+Host $IP
+  HostName $IP
+  User $USER
+  Port 22
+  IdentityFile ~/.ssh/id_rsa
+  UserKnownHostsFile /dev/null
+  StrictHostKeyChecking no
+  PasswordAuthentication no
+  IdentitiesOnly yes
+  LogLevel FATAL
+EOF
+
+    scp $F k-1:/tmp/.tmp-ssh-config
+
+    if ! ssh k-1 'diff $HOME/.ssh/config /tmp/.tmp-ssh-config'; then
+        echo "The SSH config file is not as expected"
+        echo "If the following test fails, compare SSH config on the control node to $F"
+    fi
+
+    if ! ssh k-1 "ssh $IP 'hostname && whoami'"; then
+        echo "Consider running the following"
+        echo "scp $F k-1:~/.ssh/config"
+    fi
+
+}
+
+allow_passwordless_ssh_to_this_host() {
+    echo 'Setup passwordless-SSH from control-node to the physical host, "k-1"'
+    if grep 'ansible-generated on k-1' ~/.ssh/authorized_keys &>/dev/null; then
+        echo "skipping since this is in ~/.ssh/authorized_keys"
+    else
+        ssh k-1 'cat ~/.ssh/id_rsa.pub' >> ~/.ssh/authorized_keys
+    fi
+
+    echo "SSH config on the control node needs to allow ssh to this user's account"
+    echo "Compare the SSH config to what is expected to make it work"
+    check_control_ssh_config
+
+    echo "Test: allow_passwordless_ssh_to_this_host"
+    ssh k-1 "ssh $IP 'hostname && whoami'"
+}
+
+test_final_ssh_command() {
+    echo "Test: test_final_ssh_command"
+    ssh k-1 "ssh $IP 'sudo su - -c whoami'"
+}
+
+# The following commands need to work
+#   ssh k-1 "ls -ld ~"
+#   ssh k-1 "ssh <IP> 'ls -ld ~'"
+#   ssh k-1 "ssh <IP> 'sudo ls /root'"
+setup_ssh() {
+    allow_passwordless_ssh_on_this_host
+    test_ssh_to_control_node
+    allow_passwordless_ssh_to_this_host
+    test_final_ssh_command
+}
+
+
+setup_ssh
