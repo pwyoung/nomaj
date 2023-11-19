@@ -1,26 +1,28 @@
 #!/bin/bash
 
 # PURPOSE
-# - Ensure the VMs are up, by running the Vagrant part
-#   nomaj -m vagrant
+# - Ensure the VMs are up, by re-running only the Vagrant step
+#     nomaj -m vagrant
 # - Create an SSH tunnel to the K8S "control-plane" node
+#     ssh -f -N -L $host_port:localhost:$container_port $SSH_ALIAS
 # - Create a Kube config file
-#   ~/.kube/config.local
+#     ~/.kube/config.local
 # - Test
-#   KUBECONFIG=$HOME/.kube/config.local kubectl get all
+#     KUBECONFIG=$HOME/.kube/config.local kubectl get all
 #
 # Requirements
-# - Do NOT bind port 6443 on this host since it will be
-#   used by the nginx-proxy when this node joins the cluster
+# - Do NOT bind port 6443 on this host
+#     since it will be used by the nginx-proxy
+#     when this node joins the cluster
 # - The nomaj repo is installed in ~/git/nomaj
-#   cd ~/git/nomaj/examples/k8s-via-kubespray && make
+#     cd ~/git/nomaj/examples/k8s-via-kubespray && make
 # - "nomaj" is found in $PATH
-#   e.g. ~/.bash_profile has
-#   PATH=$PATH:~/git/nomaj
+#     e.g. ~/.bash_profile has
+#     PATH=$PATH:~/git/nomaj
 # - The nomaj job was run already
-#   That job has added SSH alias "k-1" to ~/.ssh/config
-#   The following works: "ssh k-1 hostname"
-#   cd ~/git/nomaj/examples/k8s-via-kubespray && make
+#     That job has added SSH alias "k-1" to ~/.ssh/config
+#     The following works: "ssh k-1 hostname"
+#     cd ~/git/nomaj/examples/k8s-via-kubespray && make
 
 set -e
 
