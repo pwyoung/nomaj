@@ -111,4 +111,8 @@ setup_ssh() {
 }
 
 
+# Set up SSH so that we can run the job
 setup_ssh
+
+# Go in and run the job
+
