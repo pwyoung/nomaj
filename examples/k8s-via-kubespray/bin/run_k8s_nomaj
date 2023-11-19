@@ -10,6 +10,8 @@
 #   KUBECONFIG=$HOME/.kube/config.local kubectl get all
 #
 # Requirements
+# - Do NOT bind port 6443 on this host since it will be
+#   used by the nginx-proxy when this node joins the cluster
 # - The nomaj repo is installed in ~/git/nomaj
 #   cd ~/git/nomaj/examples/k8s-via-kubespray && make
 # - "nomaj" is found in $PATH
@@ -25,7 +27,8 @@ set -e
 # SSH to this host (to get kubeconfig and for SSH tunnel to K8S API)
 SSH_ALIAS="k-1"
 container_port="6443"
-host_port="6443"
+# Moved this since nginx-proxy tries to bind to 6443
+host_port="6444"
 
 
 # Start the VMs comprising the K8S cluster.
@@ -48,17 +51,23 @@ start_vms() {
 # Make a tunnel from the host to the Master
 # node (VM) in the nomaj K8S cluster
 tunnel_to_k8s() {
-    if ! ps eax | grep -v grep | grep "PID_ID_TAG='nomaj-ssh-tunnel'"; then
-        echo "Start tunnel"
-        export PID_ID_TAG='nomaj-ssh-tunnel' && ssh -f -N -L $host_port:localhost:$container_port $SSH_ALIAS
+    if ! ps eax | grep -v grep | grep "ssh -f -N -L $host_port:localhost:$container_port $SSH_ALIAS" | awk '{print $1}'; then
+        echo "Start SSH tunnel"
+        ssh -f -N -L $host_port:localhost:$container_port $SSH_ALIAS
     else
-        echo "Tunnel is running"
+        echo "SSH Tunnel already exists"
     fi
+    sleep 3
 }
 
 update_kube_config_local() {
     mkdir -p ~/.kube
-    ssh $SSH_ALIAS "sudo su - -c 'cat /root/.kube/config' 2>/dev/null" > ~/.kube/config.local
+
+    F1=~/.kube/config.local.temp
+    ssh $SSH_ALIAS "sudo su - -c 'cat /root/.kube/config' 2>/dev/null" > $F1
+
+    F2=~/.kube/config.local
+    cat $F1 | perl -pe "s/6443/$host_port/g" > $F2
 }
 
 use_kube_config_local() {
