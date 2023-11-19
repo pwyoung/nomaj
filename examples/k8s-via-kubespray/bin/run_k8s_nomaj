@@ -1,9 +1,13 @@
 #!/bin/bash
 
 # PURPOSE
-# - Run 'nomaj -m vagrant' to ensure the VMs are up
+# - Ensure the VMs are up, by running the Vagrant part
+#   nomaj -m vagrant
 # - Create an SSH tunnel to the K8S "control-plane" node
-# - Copy the Kube config file to ~/.kube/config/local
+# - Create a Kube config file
+#   ~/.kube/config.local
+# - Test
+#   KUBECONFIG=$HOME/.kube/config.local kubectl get all
 #
 # Requirements
 # - The nomaj repo is installed in ~/git/nomaj
