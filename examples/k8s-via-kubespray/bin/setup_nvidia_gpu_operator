@@ -77,15 +77,39 @@ run_nvidia_gpu_operator() {
     # Scenario
     #   Ubuntu bare-metal node
     #     https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/getting-started.html#bare-metal-passthrough-with-default-configurations-on-ubuntu
-    helm install --wait --generate-name \
-         -n $NS --create-namespace \
-         nvidia/gpu-operator
+    #
+        echo "Installing the helm chart for the nvidia/gpu-operator"
+        exit 1
+        helm install --wait --generate-name \
+             -n $NS --create-namespace \
+             nvidia/gpu-operator
+    fi
 }
 
-run_nvidia_gpu_operator
-exit 1
 
-unstated_prereqs
-setup_prereqs
-install_nvidia_gpu_operator
-run_nvidia_gpu_operator
+install_nvidia_gpu_operator() {
+    unstated_prereqs
+    setup_prereqs
+    install_nvidia_gpu_operator
+    run_nvidia_gpu_operator
+}
+
+test_nvidia_gpu_operator() {
+    # Show nodes
+    kubectl get nodes -o wide
+}
+
+main() {
+    # If the default container runtime is already nvidia, then this probably succeeded already.
+    C=$(sudo cat /etc/containerd/config.toml | tr -d '"' | grep default_runtime_name | awk '{print $3}')
+    if [ "$C" == "nvidia" ]; then
+        echo "The default containerd runtime is already nvidia"
+        echo "Skipping the helm chart installation for the nvidia/gpu-operator"
+    else
+        install_nvidia_gpu_operator
+    fi
+
+    test_nvidia_gpu_operator
+}
+
+main
