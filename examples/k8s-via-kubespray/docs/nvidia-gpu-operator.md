@@ -12,3 +12,6 @@
 [Operator customization](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/custom-driver-params.html)
 
 
+# Setup
+
+https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/getting-started.html

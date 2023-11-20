@@ -124,6 +124,8 @@ test_nvidia_gpu_operator() {
     # sudo ctr task list # Show running containers
     # sudo ctr image remove $IMG
 
+
+
     # https://docs.nvidia.com/datacenter/cloud-native/gpu-telemetry/latest/integrating-telemetry-kubernetes.html
 }
 
