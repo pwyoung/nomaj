@@ -6,9 +6,8 @@ TESTS=$(wildcard ./tests*/unit-tests/*)
 #TESTS=./tests/unit-tests/module-ansible
 #TESTS=./tests/unit-tests/module-vagrant
 
-SSHCFG=$$HOME/.ssh/config
-
-default: test
+#default: test
+default: deps
 
 FORCE:
 
@@ -23,22 +22,19 @@ test: deps
 		make -C $$test clean; \
 	done
 
-python3: FORCE
-	$(info Install pips)
-	pip3 -q install -r requirements.txt
-
-ssh-config: FORCE
-	$(info SSH config file must exist)
-	test -f $(SSHCFG) || echo "creating $(SSHCFG)" && touch $(SSHCFG)
-
-passwordless-ssh: FORCE
-	$(info Passwordless SSH must work)
-	ssh localhost whoami || echo 'WARNING: passwordless SSH failed. This is used by complex Ansible playbooks such as the K8S installer.'
-
-os-packages: FORCE
+setup-script: FORCE
 	$(info Install os-package dependencies)
 	./deps/nomaj-deps.sh
 
-deps: python3 ssh-config passwordless-ssh
-	$(info deps)
+python3: setup-script
+	$(info Install pips)
+	pip3 -q install -r requirements.txt
+
+passwordless-ssh: setup-script
+	$(info Passwordless SSH must work)
+	@ssh localhost whoami || echo 'WARNING: passwordless SSH failed. This is used by complex Ansible playbooks such as the K8S installer.'
+
+deps: python3 passwordless-ssh
+	$(info Installed dependencies for nomaj)
+	$(info Run 'make test' to run tests)
 

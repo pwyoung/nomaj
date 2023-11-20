@@ -11,9 +11,9 @@ set -e
 PKGS="emacs-nox tree glances htop dmidecode"
 PKGS+=" gnome-boxes virt-manager"
 PKGS+=" python3-pip vagrant "
+PKGS+=" python-is-python3 python3-venv"
 #PKGS+=" xdg-utils"
 #PKGS+=" xfsprogs"
-PKGS+=" python-is-python3 python3-venv"
 # For local certs, esp on K8S
 # https://github.com/cloudflare/cfssl
 #PKGS+=" golang-cfssl"
@@ -40,7 +40,7 @@ configure_qemu_helper() {
     #
     sudo chgrp $USER /etc/qemu/bridge.conf
 
-    if ! systemctl status libvirtd.service | grep 'active (running)'; then
+    if ! sudo systemctl status libvirtd.service | grep 'active (running)'; then
         cat <<EOF
         # Setup libvirt daemon
         systemctl enable libvirtd.service
@@ -111,6 +111,10 @@ setup_ssh() {
 
     # Passwordless-SSH should work
     ssh localhost hostname
+
+    # SSH-config
+    SSHCFG=$HOME/.ssh/config
+    test -f $SSHCFG || echo "creating $SSHCFG" && touch $SSHCFG
 }
 
 
@@ -119,7 +123,7 @@ main() {
     install_packages
     configure_qemu_helper
     setup_ansible
-    setup_ssh   
+    setup_ssh
 }
 
 main
