@@ -93,7 +93,38 @@ install_nvidia_gpu_operator() {
 
 test_nvidia_gpu_operator() {
     # Show nodes
-    kubectl get nodes -o wide
+    #kubectl get nodes -o wide
+    #
+    # Show all labels
+    # kubectl get nodes -o json | jq ".items[] | {node: .metadata.name, LABELS: .metadata.labels}"
+    #
+    #
+    L='feature.node.kubernetes.io/pci-10de.present'
+    x=$(kubectl get nodes -o json | jq ".items[] | {node: .metadata.name, NVIDIA_MANAGED: .metadata.labels.\"$L\"}")
+    if echo $x | grep "true" &>/dev/null; then
+        echo "It looks like a node is managed by the Nvidia GPU Operator"
+    fi
+
+    # Test that containerd is used
+    RT="containerd"
+    N=$(kubectl get nodes -o wide | awk '{print $12}' | cut -d':' -f 1 | grep "$RT" | wc -l)
+    if [ $N -gt 0 ]; then
+        echo "Looks like the K8S nodes are using container runtime=$RT"
+    else
+        echo "Looks like the K8S nodes are NOT using container runtime=$RT"
+        exit 1
+    fi
+
+
+    # Test ability to pull an image with containerd
+    IMG='quay.io/quay/busybox:latest'
+    sudo ctr image pull $IMG
+    sudo ctr image ls -q
+    echo "echo 'THIS-RAN-IN-$RT' && exit" | sudo ctr run --rm $IMG pwy-test
+    # sudo ctr task list # Show running containers
+    # sudo ctr image remove $IMG
+
+    # https://docs.nvidia.com/datacenter/cloud-native/gpu-telemetry/latest/integrating-telemetry-kubernetes.html
 }
 
 main() {
