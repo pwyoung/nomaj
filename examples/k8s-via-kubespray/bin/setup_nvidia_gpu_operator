@@ -84,7 +84,6 @@ run_nvidia_gpu_operator() {
          nvidia/gpu-operator
 }
 
-
 install_nvidia_gpu_operator() {
     unstated_prereqs
     setup_prereqs
