@@ -65,6 +65,9 @@ start_vms() {
 
 # This makes an SSH-tunnel network connection
 connect_to_k8s_via_tunnel() {
+    echo "This works but is deprecated"
+    exit 1
+
     # Make a tunnel from the host to the Master
     # node (VM) in the nomaj K8S cluster
     if ! ps eax | grep -v grep | grep "ssh -f -N -L $host_port:localhost:$container_port $SSH_ALIAS" | awk '{print $1}'; then
