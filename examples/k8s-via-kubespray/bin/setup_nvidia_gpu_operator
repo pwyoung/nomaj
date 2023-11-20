@@ -1,0 +1,91 @@
+#!/bin/bash
+
+# Namespace for the operator (and its operands)
+NS="gpu-operator"
+
+setup_prereqs() {
+    DOC="https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/getting-started.html#prerequisites"
+
+    # NAMESPACE
+    if ! kubectl get ns | awk '{print $1}' | egrep "^$NS$" &>/dev/null; then
+        kubectl create ns $NS
+    fi
+    if ! kubectl get ns --show-labels=true | egrep "^$NS$" | grep '=privileged' &>/dev/null; then
+        kubectl label --overwrite ns $NS pod-security.kubernetes.io/enforce=privileged
+    fi
+
+    # NFD
+    if kubectl get nodes -o json | jq '.items[].metadata.labels | keys | any(startswith("feature.node.kubernetes.io"))' | grep -i 'true'; then
+        echo "NFD must be disabled!, per $DOC"
+        exit 1
+    fi
+
+    # Determine "NVIDIA Virtual GPU Software Version"
+    if nvidia-smi | grep 'NVIDIA-SMI' | awk '{print $3}' | cut -d '.' -f 1 | grep '535'; then
+        echo "NVIDIA Virtual GPU Software Version is 16.x"
+    else
+        echo "Make sure your NVIDIA Virtual GPU Software is installed"
+        echo "https://docs.nvidia.com/grid/get-grid-version.html"
+        echo "https://docs.nvidia.com/grid/16.0/grid-vgpu-release-notes-ubuntu/index.html"
+        exit 1
+    fi
+
+}
+
+unstated_prereqs() {
+    # NGC CLI
+    if ! ngc version info &>/dev/null ; then
+        echo "Install NGC CLI"
+        echo "open https://ngc.nvidia.com/setup/installers/cli"
+        exit 1
+    fi
+
+    # STR="ny9dz9ua1hz5" # my org
+    STR="user" # Prob good enough
+    if ! ngc config current | grep $STR &>/dev/null ; then
+        echo "Configure NGC CLI"
+        echo "run: ngc config set"
+        exit 1
+    fi
+}
+
+install_nvidia_gpu_operator() {
+    # Helm
+    if ! command -v helm; then
+        curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 \
+            && chmod 700 get_helm.sh \
+            && ./get_helm.sh
+    fi
+    helm version
+
+    # Helm repo
+    if ! helm repo list | awk '{print $1}' | egrep '^nvidia$' &>/dev/null ; then
+        helm repo add nvidia https://helm.ngc.nvidia.com/nvidia
+    fi
+    helm repo update
+}
+
+run_nvidia_gpu_operator() {
+    # Options
+    #  https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/getting-started.html#chart-customization-options
+    #
+    # daemonsets.labels={ "pwy-gpu-operator-managed" : "true"}
+    # operator.labels={ "pwy-gpu-operator-managed2" : "true"}
+    # driver.enabled=false
+    # nfd.enabled=false # If NFD was installed already
+
+    # Scenario
+    #   Ubuntu bare-metal node
+    #     https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/getting-started.html#bare-metal-passthrough-with-default-configurations-on-ubuntu
+    helm install --wait --generate-name \
+         -n $NS --create-namespace \
+         nvidia/gpu-operator
+}
+
+run_nvidia_gpu_operator
+exit 1
+
+unstated_prereqs
+setup_prereqs
+install_nvidia_gpu_operator
+run_nvidia_gpu_operator

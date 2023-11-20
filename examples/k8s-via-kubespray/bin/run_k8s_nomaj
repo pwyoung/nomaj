@@ -36,6 +36,19 @@ host_port="6444"
 # Start the VMs comprising the K8S cluster.
 # This assumes that the VMs were created and configured with K8S.
 start_vms() {
+
+    D=~/git/nomaj/examples/k8s-via-kubespray/build/vagrant
+    if [ -e $D ]; then
+        cd $D
+        N=$(vagrant status | grep 'libvirt' | grep 'running' | wc -l)
+        echo "Found $N nodes running"
+        if [ $N -ge 5 ]; then
+            echo "Not running vagrant again"
+            sleep 0.5
+            return
+        fi
+    fi
+
     cd ~/git/nomaj/examples/k8s-via-kubespray
     if nomaj -m vagrant; then
         echo "Started VMs"
@@ -49,27 +62,50 @@ start_vms() {
     vagrant global-status
 }
 
-# _tunnel_to_k8s
-# Make a tunnel from the host to the Master
-# node (VM) in the nomaj K8S cluster
-tunnel_to_k8s() {
+
+# This makes an SSH-tunnel network connection
+connect_to_k8s_via_tunnel() {
+    # Make a tunnel from the host to the Master
+    # node (VM) in the nomaj K8S cluster
     if ! ps eax | grep -v grep | grep "ssh -f -N -L $host_port:localhost:$container_port $SSH_ALIAS" | awk '{print $1}'; then
         echo "Start SSH tunnel"
         ssh -f -N -L $host_port:localhost:$container_port $SSH_ALIAS
     else
         echo "SSH Tunnel already exists"
     fi
-    sleep 3
+
+    # Create a KUBE config file that works with the tunnel
+    mkdir -p ~/.kube
+    F1=~/.kube/config.local.temp
+    ssh $SSH_ALIAS "sudo su - -c 'cat /root/.kube/config' 2>/dev/null" > $F1
+    # Do not bind to 6443 on this host since it will also be a worker node
+    # which runs nginx-proxy on 6443
+    F2=~/.kube/config.local
+    cat $F1 | perl -pe "s/6443/$host_port/g" > $F2
+    chmod 700 $F2
 }
 
-update_kube_config_local() {
+# This makes a direct network connection
+connect_to_k8s_directly() {
+    # Create a KUBE config file that specifies the accessible control node
     mkdir -p ~/.kube
-
     F1=~/.kube/config.local.temp
     ssh $SSH_ALIAS "sudo su - -c 'cat /root/.kube/config' 2>/dev/null" > $F1
 
+    # Get the IP of "k-1".
+    # "k-1" is added to /etc/hosts by Kubespray, but don't assume that ran yet
+    D=~/git/nomaj/examples/k8s-via-kubespray/build/vagrant
+    IP=$(cd $D && vagrant ssh k-1 -c 'ip a s' | grep eth0 | grep inet | awk '{print $2}' | cut -d '/' -f 1)
+
+    # Replace the connection IP with the known host name "k-1"
     F2=~/.kube/config.local
-    cat $F1 | perl -pe "s/6443/$host_port/g" > $F2
+    cat $F1 | perl -pe "s/127.0.0.1/$IP/g" > $F2
+    chmod 700 $F2
+}
+
+connect_to_k8s() {
+    #connect_to_k8s_via_tunnel
+    connect_to_k8s_directly
 }
 
 use_kube_config_local() {
@@ -91,6 +127,5 @@ use_kube_config_local() {
 }
 
 start_vms
-tunnel_to_k8s
-update_kube_config_local
+connect_to_k8s
 use_kube_config_local
