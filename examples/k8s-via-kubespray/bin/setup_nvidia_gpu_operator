@@ -78,12 +78,10 @@ run_nvidia_gpu_operator() {
     #   Ubuntu bare-metal node
     #     https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/getting-started.html#bare-metal-passthrough-with-default-configurations-on-ubuntu
     #
-        echo "Installing the helm chart for the nvidia/gpu-operator"
-        exit 1
-        helm install --wait --generate-name \
-             -n $NS --create-namespace \
-             nvidia/gpu-operator
-    fi
+    echo "Installing the helm chart for the nvidia/gpu-operator"
+    helm install --wait --generate-name \
+         -n $NS --create-namespace \
+         nvidia/gpu-operator
 }
 
 
