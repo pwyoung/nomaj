@@ -30,11 +30,18 @@ python3: setup-script
 	$(info Install pips)
 	pip3 -q install -r requirements.txt
 
-passwordless-ssh: setup-script
-	$(info Passwordless SSH must work)
-	@ssh localhost whoami || echo 'WARNING: passwordless SSH failed. This is used by complex Ansible playbooks such as the K8S installer.'
+ssh-config:
+	$(info SSH config file must exist)
+	test -f $(SSHCFG) || echo "creating $(SSHCFG)" && touch $(SSHCFG)
 
-deps: python3 passwordless-ssh
-	$(info Installed dependencies for nomaj)
-	$(info Run 'make test' to run tests)
+passwordless-ssh:
+	$(info Passwordless SSH must work for complex playbooks)
+	ssh localhost whoami || echo 'WARNING: passwordless SSH failed. This is used by playbooks such as the K8S installer.'
+
+gsed-on-mac:
+	$(info Require 'gsed' on Mac/OSX)
+	if uname | grep Darwin &>/dev/null; then gsed --version &>/dev/null; fi
+
+deps: python3 ssh-config passwordless-ssh gsed-on-mac
+	$(info deps)
 

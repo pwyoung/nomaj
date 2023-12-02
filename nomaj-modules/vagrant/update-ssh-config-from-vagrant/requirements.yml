@@ -1,9 +1,7 @@
 # http://docs.ansible.com/galaxy.html#installing-multiple-roles-from-a-file
 # The skinny: ansible-galaxy install -r requirements.yml
 
-
 - src: https://github.com/pwyoung/update_ssh_config_vagrant.git
   name: mcgrof.update_ssh_config_vagrant
-#  version: v4.0.6
-#  version: use-vagrant-status
-  version: moved-symlink
+  version: v4.0.7
+
